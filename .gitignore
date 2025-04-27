@@ -7,9 +7,10 @@
 /bazel-out
 
 # Node
-/node_modules
-npm-debug.log
-yarn-error.log
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # IDEs and editors
 .idea/
@@ -21,22 +22,40 @@ yarn-error.log
 *.sublime-workspace
 
 # Visual Studio Code
-.vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-.history/*
+.history/
 
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
+# Testing
 /coverage
-/libpeerconnection.log
-testem.log
-/typings
+/lcov-report
+**/junit.xml
+**/test-results.xml
+
+# Angular CLI
+.angular/
+.angular/cache
+
+# Environment Files
+src/environments/environment*.ts
+
+# Logs
+*.log
 
 # System files
 .DS_Store
 Thumbs.db
+
+# Temporary files
+.sass-cache/
+/connect.lock
+/libpeerconnection.log
+testem.log
+/typings
+
+# Output of ng-packagr
+.integration/
+.out/

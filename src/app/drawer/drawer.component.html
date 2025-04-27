@@ -1,0 +1,6 @@
+<p-drawer header="User Menu" 
+          [visible]="drowerService.isUserMenuActive()"
+          (onHide)="drowerService.toggleUserMenu()" 
+          position="right">
+    <app-user-menu></app-user-menu>
+</p-drawer>
