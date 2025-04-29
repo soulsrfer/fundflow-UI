@@ -4,3 +4,9 @@
 @use 'primeicons/primeicons.css';
 @use './assets/demo/demo.scss';
 @import "tailwindcss";
+
+
+
+.layout-topbar-logo img {
+    content: url('/logos/fundflow-logo-3.svg');
+}

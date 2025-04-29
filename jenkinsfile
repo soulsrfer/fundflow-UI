@@ -1,0 +1,79 @@
+// ─── Jenkinsfile ────────────────────────────────────────────────────────────────────
+pipeline {
+    agent any
+
+    environment {
+        // adjust these
+        DOCKER_IMAGE      = 'fundflow-ui'
+        DOCKER_CONTAINER  = 'fundflow-ui-container'
+        SERVER_IP         = '65.20.85.208'
+        SSH_CREDENTIALS   = 'your-ssh-creds-id'       // Jenkins > Credentials
+        GIT_CREDENTIALS   = 'github-credentials'      // Jenkins > Credentials
+        GIT_BRANCH        = 'developer'
+        GIT_REPO          = 'git@github.com:your-org/fundflow-UI.git'
+        REGISTRY_URL      = 'docker.io/soulsrfer'                        // e.g. docker.io/your-org
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                echo "Cloning UI repository..."
+                git credentialsId: GIT_CREDENTIALS, branch: GIT_BRANCH, url: GIT_REPO
+            }
+        }
+
+        stage('Install & Build') {
+            steps {
+                echo "Installing NPM dependencies and building Angular app..."
+                sh 'npm ci'
+                sh 'npm run build -- --configuration production'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // if using a registry: "${REGISTRY_URL}/${DOCKER_IMAGE}:latest"
+                    dockerImage = "${DOCKER_IMAGE}:latest"
+                    sh "docker build -t ${dockerImage} -f Dockerfile ."
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            when { expression { REGISTRY_URL } }
+            steps {
+                script {
+                    echo "Logging in to Docker registry..."
+                    sh "docker login ${REGISTRY_URL} -u $DOCKER_USER -p $DOCKER_PASS"
+                    sh "docker tag ${DOCKER_IMAGE}:latest ${REGISTRY_URL}/${DOCKER_IMAGE}:latest"
+                    sh "docker push ${REGISTRY_URL}/${DOCKER_IMAGE}:latest"
+                }
+            }
+        }
+
+        stage('Deploy to Server') {
+            steps {
+                echo "Deploying UI container on ${SERVER_IP}..."
+                sshagent (credentials: [SSH_CREDENTIALS]) {
+                    // stop old container, remove it, and start new one
+                    sh """
+                       ssh -o StrictHostKeyChecking=no ubuntu@${SERVER_IP} \\
+                         'docker rm -f ${DOCKER_CONTAINER} || true && \\
+                          docker run -d --name ${DOCKER_CONTAINER} -p 80:80 \\
+                            ${REGISTRY_URL ? "${REGISTRY_URL}/${DOCKER_IMAGE}:latest" : "${DOCKER_IMAGE}:latest"}'
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'UI build & deployment succeeded!'
+        }
+        failure {
+            echo 'Something went wrong. Please check the logs.'
+        }
+    }
+}
