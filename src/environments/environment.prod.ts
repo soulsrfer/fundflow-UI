@@ -1,0 +1,1 @@
+export const environment = { production: true, apiUrl: 'http://65.20.85.208:9090' };

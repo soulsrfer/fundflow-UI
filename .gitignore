@@ -40,7 +40,7 @@ pnpm-debug.log*
 .angular/cache
 
 # Environment Files
-src/environments/environment*.ts
+# src/environments/environment*.ts
 
 # Logs
 *.log
