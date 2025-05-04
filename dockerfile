@@ -1,28 +1,27 @@
-# ─── Dockerfile (at your UI repo root) ─────────────────────────────────────────────
-
-# Stage 1: install & build
+# ─── Stage 1: Build Angular App ─────────────────────────────────────────────
 FROM node:22-alpine AS build
 WORKDIR /app
 
-# copy package manifests and install dependencies
+# Copy package files and install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# copy rest of the source, including tailwind/primes styles
+# Copy the rest of the source code
 COPY . .
 
-# build for production (update <your-app-name> to match angular.json)
+# Build the Angular app using the correct configuration
 RUN npm run build -- --configuration production
 
-# Stage 2: serve with nginx
+# ─── Stage 2: Serve using Nginx ─────────────────────────────────────────────
 FROM nginx:stable-alpine
-# remove default nginx content
+
+# Remove default Nginx website
 RUN rm -rf /usr/share/nginx/html/*
 
-# copy built artifacts
-COPY --from=build /app/dist/<your-app-name> /usr/share/nginx/html
+# Copy built Angular app to Nginx public folder
+COPY --from=build /app/dist/fundflow-UI /usr/share/nginx/html
 
-# optional: use a custom nginx.conf if you need HTML5 push-state routing
+# (Optional) Copy custom Nginx config for SPA routing
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
