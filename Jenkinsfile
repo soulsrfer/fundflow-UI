@@ -10,7 +10,7 @@ pipeline {
         SSH_CREDENTIALS   = 'your-ssh-creds-id'       // Jenkins > Credentials
         GIT_CREDENTIALS   = 'github-credentials'      // Jenkins > Credentials
         GIT_BRANCH        = 'developer'
-        GIT_REPO          = 'git@github.com:your-org/fundflow-UI.git'
+        GIT_REPO          = 'https://github.com/soulsrfer/fundflow-UI.git'
         REGISTRY_URL      = 'docker.io/soulsrfer'                        // e.g. docker.io/your-org
     }
 
