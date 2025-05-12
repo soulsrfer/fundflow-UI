@@ -43,7 +43,7 @@ pipeline {
             steps {
                 withDockerRegistry([credentialsId: 'docker-hub-credentials', url: 'https://index.docker.io/v1/']) {
                     echo "Tagging the Docker image as soulsrfer/${DOCKER_IMAGE}:latest"
-                    sh "docker tag ${DOCKER_IMAGE}:latest ${REGISTRY_URL}/${DOCKER_IMAGE}:latest"
+                    sh "docker tag ${REGISTRY_URL}/${DOCKER_IMAGE}:latest ${REGISTRY_URL}/${DOCKER_IMAGE}:latest"
 
                     echo 'Pushing the Docker image to Docker Hub...'
                     sh "docker push ${REGISTRY_URL}/${DOCKER_IMAGE}:latest"
