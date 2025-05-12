@@ -12,6 +12,8 @@ pipeline {
         GIT_BRANCH        = 'developer'
         GIT_REPO          = 'git@github.com:soulsrfer/fundflow-UI.git'
         REGISTRY_URL      = 'docker.io/soulsrfer'                        // e.g. docker.io/your-org
+        HOST_PORT        = '8080' // Port on the host machine
+        CONTAINER_PORT    = '80'   // Port inside the container
     }
 
     stages {
@@ -75,7 +77,7 @@ pipeline {
                       "docker pull ${REGISTRY_URL}/${DOCKER_IMAGE}:latest && \\
                        docker stop ${DOCKER_CONTAINER} || true && \\
                        docker rm ${DOCKER_CONTAINER} || true && \\
-                       docker run -d --name ${DOCKER_CONTAINER} -p 80:80 \\
+                       docker run -d --name ${DOCKER_CONTAINER} -p ${HOST_PORT}:${CONTAINER_PORT} \\
                          ${REGISTRY_URL}/${DOCKER_IMAGE}:latest"
                 """
                     }
@@ -89,7 +91,7 @@ pipeline {
                     echo 'Verifying deployment...'
                     sh '''
                         ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" soulsrfer@${SERVER_IP} \\
-                        'curl -s -o /dev/null -w "%{http_code}" http://localhost:80'
+                        'curl -s -o /dev/null -w "%{http_code}" http://localhost:${HOST_PORT}'
                     '''
                 }
             }
