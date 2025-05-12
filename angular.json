@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "fundflow-UI": {
+    "fundflow-ui": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -71,10 +71,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "fundflow-UI:build:production"
+              "buildTarget": "fundflow-ui:build:production"
             },
             "development": {
-              "buildTarget": "fundflow-UI:build:development"
+              "buildTarget": "fundflow-ui:build:development"
             }
           },
           "defaultConfiguration": "development"

@@ -3,7 +3,7 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 # Copy package files and install dependencies
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci
 
 # Copy the rest of the source code
@@ -19,7 +19,8 @@ FROM nginx:stable-alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy built Angular app to Nginx public folder
-COPY --from=build /app/dist/fundflow-ui /usr/share/nginx/html
+COPY --from=build /app/dist/fundflow-ui/browser/. /usr/share/nginx/html/
+
 
 # (Optional) Copy custom Nginx config for SPA routing
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
