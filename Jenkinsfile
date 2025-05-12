@@ -7,8 +7,8 @@ pipeline {
         DOCKER_IMAGE      = 'fundflow-ui'
         DOCKER_CONTAINER  = 'fundflow-ui-container'
         SERVER_IP         = '65.20.85.208'
-        SSH_CREDENTIALS   = 'your-ssh-creds-id'       // Jenkins > Credentials
-        GIT_CREDENTIALS   = 'github-credentials'      // Jenkins > Credentials
+        SSH_CREDENTIALS   = '9e9a4819-6f54-4c0b-b62a-36b6dd011583'    
+        GIT_CREDENTIALS   = 'github-credentials'     
         GIT_BRANCH        = 'developer'
         GIT_REPO          = 'git@github.com:soulsrfer/fundflow-UI.git'
         REGISTRY_URL      = 'docker.io/soulsrfer'                        // e.g. docker.io/your-org
@@ -60,7 +60,7 @@ pipeline {
             steps {
                 withCredentials([
             sshUserPrivateKey(
-                credentialsId: '9e9a4819-6f54-4c0b-b62a-36b6dd011583',
+                credentialsId: "${SSH_CREDENTIALS}",
                 keyFileVariable: 'SSH_KEY'
             )
         ]) {
