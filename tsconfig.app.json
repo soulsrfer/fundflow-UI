@@ -6,7 +6,16 @@
     "outDir": "./out-tsc/app",
     "types": [
       "node"
-    ]
+    ],
+    "baseUrl": "./",
+    "paths": {
+      "@service/*": ["src/app/services/*"],
+      "@interceptors/*": ["src/app/interceptors/*"],
+      "@guards/*": ["src/app/guards/*"],
+      "@components/*": ["src/app/components/*"],
+      "@environments/*": ["src/environments/*"],
+      "@assets/*": ["src/assets/*"],
+    }
   },
   "files": [
     "src/main.ts",

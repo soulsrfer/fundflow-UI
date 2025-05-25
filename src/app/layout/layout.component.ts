@@ -6,7 +6,7 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { FooterComponent } from './footer/footer.component';
 import { filter, Subscription } from 'rxjs';
 import { LayoutService } from './layout.service';
-import { PlatformService } from '../service/platform.service';
+import { PlatformService } from '../services/platform.service';
 import { DrawerComponent } from "../drawer/drawer.component";
 
 @Component({

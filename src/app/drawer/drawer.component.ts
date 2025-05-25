@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { DrawerModule } from 'primeng/drawer';
 import { DrawerService } from './drawer.service';
-import { UserMenuComponent } from "../user/user-menu/user-menu.component";
+import { UserMenuComponent } from "@components/user-menu/user-menu.component";
 
 @Component({
   selector: 'app-drawer',
