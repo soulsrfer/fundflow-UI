@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
@@ -8,6 +8,16 @@ import { ButtonModule } from 'primeng/button';
   templateUrl: './not-found.component.html',
   styleUrl: './not-found.component.scss'
 })
-export class NotFoundComponent {
+export class NotFoundComponent implements OnInit {
+  attemptedUrl: string = '';
+  constructor(private router: Router) {}
 
+  ngOnInit(): void {
+    this.attemptedUrl = this.router.url;
+    console.error(`Route not found: ${this.attemptedUrl}`);
+    if (this.attemptedUrl.startsWith('/.well-known')) {
+    // Don't log this noise
+    return;
+  }
+  }
 }

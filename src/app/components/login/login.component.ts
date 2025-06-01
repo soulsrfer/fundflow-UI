@@ -7,7 +7,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -36,8 +36,14 @@ export class LoginComponent {
   loginForm!: FormGroup;
 
   loading: boolean = false;
+    error: string | null = null;
 
-  constructor(private auth: AuthService, private fb: FormBuilder) {
+
+  constructor(
+    private authService: AuthService,
+    private fb: FormBuilder,
+    private router: Router
+  ) {
     this.initializeLoginForm();
   }
 
@@ -48,23 +54,22 @@ export class LoginComponent {
       checked: new FormControl(false),
     });
   }
-  onSubmit(): void {
+  onSubmit() {
+    this.error = null;
+
+    if (this.loginForm.invalid) return;
+
     this.loading = true;
-    console.log('login form : ', this.loginForm.value);
-    if (this.loginForm.valid) {
-      this.auth.login(this.loginForm.value).subscribe({
-        next: (res) => {
-          this.loading = false;
-          window.location.href = '/app';
-        },
-        error: (err) => {
-          console.error('Login failed', err);
-          this.loading = false;
-        },
-      });
-    } else {
-      this.loading = false;
-      console.error('Login form is invalid');
-    }
-  } 
+
+    this.authService.login(this.loginForm.value).subscribe({
+      next: () => {
+        this.router.navigate(['/dashboard']);// authGuard handles role-based redirection
+      },
+      error: (err) => {
+        this.error = 'Login failed. Please check your credentials.';
+        console.error('Login error:', err);
+        this.loading = false;
+      }
+    });
+  }
 }

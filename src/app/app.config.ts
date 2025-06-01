@@ -11,6 +11,7 @@ import Aura from '@primeng/themes/aura';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { AppThemePreset } from './app.theme';
 import { tokenInterceptor } from './interceptors/token.interceptor';
+import { MessageService } from 'primeng/api';
 
 
 export const appConfig: ApplicationConfig = {
@@ -20,7 +21,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch(), withInterceptors([tokenInterceptor])),
     provideClientHydration(withEventReplay()),
     provideAnimationsAsync(),
-    providePrimeNG({ theme: { preset: AppThemePreset, options: { darkModeSelector: '.app-dark' } } })
+    providePrimeNG({ theme: { preset: AppThemePreset, options: { darkModeSelector: '.app-dark' } } }),
+    MessageService
 
   ],
 };

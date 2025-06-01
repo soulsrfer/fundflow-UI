@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '@environments/environment';
 import { PlatformService } from './platform.service';
+import { ApiResponse } from '@interfaces/api-response.interface';
 
 interface JwtPayload {
   SCOPE: string;
@@ -23,20 +24,24 @@ export class AuthService {
   private platform = inject(PlatformService);
 
   constructor(private http: HttpClient) {
-    const token = this.getToken();
-    if (token) {
-      const decoded = this.decodeToken(token);
-      this.currentUserSubject.next(decoded);
-      this.startAutoLogout(decoded.exp);
+    if (this.platform.isbrowser()) {
+      const token = this.getToken();
+      if (token) {
+        const decoded = this.decodeToken(token);
+        this.currentUserSubject.next(decoded);
+        this.startAutoLogout(decoded.exp);
+      }
     }
   }
 
   login(payload: { username: string; password: string }): Observable<string> {
+
     return new Observable((observer) => {
       this.http
-        .post(`${this.apiUrl}/user/login`, payload, { responseType: 'text' })
+        .post<ApiResponse<string>>(`${this.apiUrl}/user/login`, payload)
         .subscribe({
-          next: (token: string) => {
+          next: (response) => {
+            const token = response.data;
             console.log('Login successful, token received:', token);
             this.setToken(token);
             const payload = this.decodeToken(token);
@@ -58,7 +63,7 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    if (!this.platform.isbrowser) {
+    if (!this.platform.isbrowser()) {
       return null;
     }
     const match = document.cookie.match(
@@ -82,6 +87,10 @@ export class AuthService {
 
   get currentUser(): Observable<JwtPayload | null> {
     return this.currentUserSubject.asObservable();
+  }
+
+  getRole(): string | null {
+    return this.getDecodedToken()?.SCOPE?.toLowerCase() || null;
   }
 
   private decodeToken(token: string): JwtPayload {

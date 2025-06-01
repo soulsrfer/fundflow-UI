@@ -25,6 +25,8 @@
       "@components/*": ["src/app/components/*"],
       "@environments/*": ["src/environments/*"],
       "@assets/*": ["src/assets/*"],
+      "@routes/*": ["src/app/routes/*"],
+      "@interfaces/*": ["src/app/interfaces/*"],
     },
   },
   "angularCompilerOptions": {

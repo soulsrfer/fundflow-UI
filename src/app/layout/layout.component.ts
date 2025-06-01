@@ -8,7 +8,8 @@ import { filter, Subscription } from 'rxjs';
 import { LayoutService } from './layout.service';
 import { PlatformService } from '../services/platform.service';
 import { DrawerComponent } from "../drawer/drawer.component";
-
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-layout',
   imports: [
@@ -16,8 +17,9 @@ import { DrawerComponent } from "../drawer/drawer.component";
     RouterModule,
     TopbarComponent,
     SidebarComponent,
-    FooterComponent,
-    DrawerComponent
+    // FooterComponent,
+    DrawerComponent,
+    ToastModule
 ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
