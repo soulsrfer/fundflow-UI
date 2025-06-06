@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { roleGuard } from '@guards/role.guard';
-import { MenuPermissionComponent } from '@components/permissions/menu-permission/menu-permission.component';
+import { MenuPermissionComponent } from '@components/admin/permissions/menu-permission/menu-permission.component';
 
 export const adminRoutes: Routes = [
   {
@@ -10,7 +10,7 @@ export const adminRoutes: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import('@components/admin-dashboard/admin-dashboard.component').then(
+          import('@components/admin/admin-dashboard/admin-dashboard.component').then(
             (m) => m.AdminDashboardComponent
           ),
       },
@@ -18,7 +18,7 @@ export const adminRoutes: Routes = [
         path: 'permissions/menu-permission',
         loadComponent: () =>
           import(
-            '@components/permissions/menu-permission/menu-permission.component'
+            '@components/admin/permissions/menu-permission/menu-permission.component'
           ).then((m) => m.MenuPermissionComponent),
       },
     ],

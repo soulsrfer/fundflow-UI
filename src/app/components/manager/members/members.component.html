@@ -1,0 +1,158 @@
+<div class="card">
+  <p-table [value]="members" [tableStyle]="{ 'min-width': '60rem' }">
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-bold">Members</span>
+        <p-button
+          label="add Member"
+          icon="pi pi-user"
+          (onClick)="addMember()"
+          raised
+        />
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>email</th>
+        <th>Icon</th>
+        <th>Joined Date</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-member>
+      <tr>
+        <td>{{ member.name }}</td>
+        <td>{{ member.phone }}</td>
+        <td>{{ member.email }}</td>
+        <td>{{ member.joinedDate }}</td>
+        <td>{{ member.active }}</td>
+        <td>
+          <p-button
+            icon="pi pi-pencil"
+            class="mr-2"
+            severity="secondary"
+            outlined
+            (onClick)="editMember(member)"
+          ></p-button>
+          <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            outlined
+            (onClick)="confirmDelete(member)"
+          ></p-button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #footer>
+      In total there are {{ members ? members.length : 0 }} members.
+    </ng-template>
+  </p-table>
+</div>
+
+<p-drawer
+  header="Add Member"
+  [(visible)]="isDrawerVisible"
+  position="right"
+  blockScroll="true"
+  (onHide)="onHide()"
+  [style]="{ width: '25rem' }"
+>
+  <form [formGroup]="memberForm" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="name">Name</label>
+        <input id="name" formControlName="name" pInputText />
+        <p-message
+          *ngIf="
+            nameControl?.invalid && (nameControl?.dirty || nameControl?.touched)
+          "
+          severity="error"
+          text="Name is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="phone">Phone</label>
+        <input id="phone" formControlName="phone" pInputText />
+        <p-message
+          *ngIf="
+            phoneControl?.invalid &&
+            (phoneControl?.dirty || phoneControl?.touched)
+          "
+          severity="error"
+          text="phone number is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="email">Email</label>
+        <input id="email" formControlName="email" pInputText />
+        <!-- <p-message
+          *ngIf="
+            emailControl?.invalid &&
+            (emailControl?.dirty || emailControl?.touched)
+          "
+          severity="error"
+          text="Email is required"
+        ></p-message> -->
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="joinedDate">Joined Date</label>
+        <p-datepicker
+          formControlName="joinedDate"
+          [showIcon]="true"
+          [iconDisplay]="'input'"
+          inputId="joinedDate"
+          [placeholder]="'Select a date'"
+          [dateFormat]="'dd/mm/yy'"
+          styleClass="w-full"
+        />
+        <p-message
+          *ngIf="
+            joinedDateControl?.invalid &&
+            (joinedDateControl?.dirty || joinedDateControl?.touched)
+          "
+          severity="error"
+          text="Joined Date is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="name">Address</label>
+        <textarea
+          rows="5"
+          cols="30"
+          pTextarea
+          formControlName="address"
+          [autoResize]="true"
+        ></textarea>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="active">Active</label>
+        <p-toggleswitch formControlName="active" id="active" />
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex items-center gap-2">
+      <button
+        pButton
+        (click)="onSubmit()"
+        label="Save"
+        icon="pi pi-user"
+        class="w-full"
+        outlined
+        [disabled]="memberForm.invalid"
+      ></button>
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-sign-out"
+        class="w-full"
+        severity="danger"
+        text
+        (click)="onHide()"
+      ></button>
+    </div>
+  </ng-template>
+</p-drawer>

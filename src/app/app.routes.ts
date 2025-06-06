@@ -22,10 +22,8 @@ export const routes: Routes = [
       {
         path: 'manager',
         canActivate: [roleGuard(['manager'])],
-        loadComponent: () =>
-          import(
-            '@components/manager-dashboard/manager-dashboard.component'
-          ).then((m) => m.ManagerDashboardComponent),
+        loadChildren: () =>
+          import('@routes/manager.routes').then((m) => m.managerRoutes),
       },
     ],
   },

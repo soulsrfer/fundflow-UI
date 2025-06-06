@@ -32,4 +32,8 @@ export class MenuService {
   updateMenuItem(id: string, menuItem: UserMenu): Observable<ApiResponse<UserMenu>> {
     return this.api.put<ApiResponse<UserMenu>>(`menu/update/${id}`, menuItem);
   }
+
+  getRoleOptions(): Observable<ApiResponse<string[]>> {
+    return this.api.get<ApiResponse<string[]>>('menu/roles');
+  }
 }

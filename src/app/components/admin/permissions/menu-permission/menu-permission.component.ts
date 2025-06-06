@@ -49,7 +49,7 @@ export class MenuPermissionComponent implements OnInit {
 
   menuForm!: FormGroup;
   parentSuggestions: UserMenu[] = [];
-  roleOptions: string[] = ['ADMIN', 'USER', 'GUEST']; // Example roles, replace with actual roles as needed
+  roleOptions!: string[]; // Example roles, replace with actual roles as needed
 
   constructor(
     private menuService: MenuService,
@@ -59,42 +59,8 @@ export class MenuPermissionComponent implements OnInit {
     this.initializeForm(this.selectedItem);
   }
   ngOnInit(): void {
-    this.menuService.getAllMenuItems().subscribe({
-      next: (response) => {
-        this.menuItems = response.data;
-      },
-      error: (error) => {
-        console.error('Error fetching menu items:', error);
-      },
-    });
-  }
-
-  openMenuItem() {
-    this.initializeForm(this.selectedItem);
-    this.isVisible = true;
-  }
-
-  editMenuItem(item: UserMenu) {
-    this.selectedItem = item;
-        this.openMenuItem();
-  }
-  confirmDelete(item: UserMenu) {
-    this.selectedItem = item;
-    this.visibleDialog = true;
-  }
-  deleteMenuItem(id: string) {
-    console.log('Deleting menu item with id:', id);
-    this.menuService.deleteMenuItem(id).subscribe({
-      next: (response) => {
-        console.log('Menu item deleted:', response);
-        this.menuItems = this.menuItems.filter((item) => item.id !== response.data.id);
-        this.onHideDialog() 
-      },
-      error: (error) => {
-        console.error('Error deleting menu item:', error);
-      },
-    });
-
+    this.initializeMenuItems();
+    this.initializeRoleOptions();
   }
 
   initializeForm(item?: UserMenu) {
@@ -106,6 +72,29 @@ export class MenuPermissionComponent implements OnInit {
       icon: new FormControl(item?.icon ?? ''),
       parentId: new FormControl(item?.parentId ?? null),
       role: new FormControl(item?.role ?? '', [Validators.required]),
+    });
+  }
+
+  initializeMenuItems() {
+    this.menuService.getAllMenuItems().subscribe({
+      next: (response) => {
+        this.menuItems = response.data;
+      },
+      error: (error) => {
+        console.error('Error fetching menu items:', error);
+      },
+    });
+  }
+
+  initializeRoleOptions() {
+    this.menuService.getRoleOptions().subscribe({
+      next: (response) => {
+        this.roleOptions = response.data;
+        console.log('Role options initialized:', this.roleOptions);
+      },
+      error: (error) => {
+        console.error('Error fetching role options:', error);
+      },
     });
   }
 
@@ -136,12 +125,12 @@ export class MenuPermissionComponent implements OnInit {
     this.menuService.createMenuItem(this.selectedItem).subscribe({
       next: (response) => {
         console.log('Menu item created:', response.data);
-        this.menuItems.push( response.data);
-        this.onHide(); 
+        this.initializeMenuItems();
+        this.onHide();
       },
       error: (error) => {
         console.error('Error creating menu item:', error);
-      },  
+      },
     });
   }
 
@@ -149,10 +138,7 @@ export class MenuPermissionComponent implements OnInit {
     this.menuService.updateMenuItem(itemId, this.selectedItem).subscribe({
       next: (response) => {
         console.log('Menu item updated:', response.data);
-        const index = this.menuItems.findIndex((item) => item.id === itemId);
-        if (index !== -1) {
-          this.menuItems[index] = response.data; // Update the existing item
-        }
+        this.initializeMenuItems();
         this.onHide(); // Close the drawer after update
       },
       error: (error) => {
@@ -180,5 +166,34 @@ export class MenuPermissionComponent implements OnInit {
   onHideDialog() {
     this.visibleDialog = false;
     this.selectedItem = {} as UserMenu;
+  }
+
+  openMenuItem() {
+    this.initializeForm(this.selectedItem);
+    this.isVisible = true;
+  }
+
+  editMenuItem(item: UserMenu) {
+    this.selectedItem = item;
+    this.openMenuItem();
+  }
+  confirmDelete(item: UserMenu) {
+    this.selectedItem = item;
+    this.visibleDialog = true;
+  }
+  deleteMenuItem(id: string) {
+    console.log('Deleting menu item with id:', id);
+    this.menuService.deleteMenuItem(id).subscribe({
+      next: (response) => {
+        console.log('Menu item deleted:', response);
+        this.menuItems = this.menuItems.filter(
+          (item) => item.id !== response.data.id
+        );
+        this.onHideDialog();
+      },
+      error: (error) => {
+        console.error('Error deleting menu item:', error);
+      },
+    });
   }
 }
