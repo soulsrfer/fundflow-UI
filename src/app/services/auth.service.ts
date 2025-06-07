@@ -114,9 +114,11 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     const token = this.getToken();
+    console.log('Checking authentication, token:', token);
     if (!token) return false;
 
     const decoded = this.decodeToken(token);
+    console.log('Decoded token:', decoded);
     if (!decoded || typeof decoded.exp !== 'number') return false;
 
     const currentTime = Math.floor(Date.now() / 1000);
