@@ -12,7 +12,7 @@ pipeline {
         GIT_BRANCH        = 'developer'
         GIT_REPO          = 'git@github.com:soulsrfer/fundflow-UI.git'
         REGISTRY_URL      = 'docker.io/soulsrfer'                        // e.g. docker.io/your-org
-        HOST_PORT        = '8080' // Port on the host machine
+        HOST_PORT        = '4200' // Port on the host machine
         CONTAINER_PORT    = '80'   // Port inside the container
     }
 
