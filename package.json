@@ -4,9 +4,6 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "dev:ssr": "ng run fundflow-ui:serve-ssr",
-    "build:ssr": "ng build && ng run fundflow-ui:server",
-    "serve:ssr": "node dist/fundflow-ui/server/main.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",

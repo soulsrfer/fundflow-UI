@@ -32,7 +32,6 @@
       "@models/*": ["src/app/models/*"],
       "@utils/*": ["src/app/utils/*"],
     },
-    "sourceMap": true,
 
   },
   "angularCompilerOptions": {
