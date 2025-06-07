@@ -27,7 +27,13 @@
       "@assets/*": ["src/assets/*"],
       "@routes/*": ["src/app/routes/*"],
       "@interfaces/*": ["src/app/interfaces/*"],
+      "@pipes/*": ["src/app/pipes/*"],
+      "@directives/*": ["src/app/directives/*"],
+      "@models/*": ["src/app/models/*"],
+      "@utils/*": ["src/app/utils/*"],
     },
+    "sourceMap": true,
+
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

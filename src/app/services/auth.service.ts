@@ -1,41 +1,32 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { environment } from '@environments/environment';
 import { PlatformService } from './platform.service';
 import { ApiResponse } from '@interfaces/api-response.interface';
-
-interface JwtPayload {
-  SCOPE: string;
-  USERID: number;
-  sub: string;
-  iat: number;
-  exp: number;
-}
-
+import { jwtDecode } from 'jwt-decode';
+import { User } from '../models/user.model';
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly tokenKey = 'auth_token';
   private readonly apiUrl = environment.apiUrl; // 🔁 Replace with your actual backend API
-  private currentUserSubject = new BehaviorSubject<JwtPayload | null>(null);
-  private logoutTimeout: any;
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
   private platform = inject(PlatformService);
+  private tokenExpirationTimer: any;
 
   constructor(private http: HttpClient) {
     if (this.platform.isbrowser()) {
       const token = this.getToken();
       if (token) {
-        const decoded = this.decodeToken(token);
+        const decoded = this.getDecodedAccessToken(token);
         this.currentUserSubject.next(decoded);
-        this.startAutoLogout(decoded.exp);
       }
     }
   }
 
   login(payload: { username: string; password: string }): Observable<string> {
-
     return new Observable((observer) => {
       this.http
         .post<ApiResponse<string>>(`${this.apiUrl}/user/login`, payload)
@@ -44,22 +35,61 @@ export class AuthService {
             const token = response.data;
             console.log('Login successful, token received:', token);
             this.setToken(token);
-            const payload = this.decodeToken(token);
+            const payload = this.getDecodedAccessToken(token);
             this.currentUserSubject.next(payload);
-            this.startAutoLogout(payload.exp);
             observer.next(token);
             observer.complete();
           },
-          error: (err) => observer.error(err),
+          error: (err) => this.handleError(err),
         });
     });
   }
 
+  handleAuthentication(token: string | null) {
+    if (token === null || token === '') return null;
+    const decodedToken = this.getDecodedAccessToken(token);
+    const user = new User(
+      decodedToken.SCOPE,
+      decodedToken.USERID,
+      decodedToken.sub,
+      token,
+      new Date(decodedToken.exp * 1000),
+      new Date(decodedToken.iat * 1000)
+    );
+    this.currentUserSubject.next(user);
+    this.setToken(token);
+    return user;
+  }
+
+  getDecodedAccessToken(token: string): any {
+    try {
+      return jwtDecode(token);
+    } catch (Error) {
+      return null;
+    }
+  }
+
   logout(): void {
-    this.deleteCookie(this.tokenKey);
-    this.clearAutoLogout();
     this.currentUserSubject.next(null);
     window.location.href = '/login';
+    this.deleteCookie(this.tokenKey);
+    if (this.tokenExpirationTimer) {
+      clearTimeout(this.tokenExpirationTimer);
+    }
+    this.tokenExpirationTimer = null;
+  }
+
+  private handleError(errorRes: HttpErrorResponse) {
+    let errorMessage = 'An unknown error occurred!';
+    if (!errorRes.error) {
+      console.log(errorRes);
+      return throwError(() => new Error(errorMessage));
+    }
+    switch (errorRes.status) {
+      case 401:
+        errorMessage = 'username or password incorrect.';
+    }
+    return throwError(() => new Error(errorMessage));
   }
 
   getToken(): string | null {
@@ -81,19 +111,18 @@ export class AuthService {
     if (!this.platform.isbrowser()) {
       return;
     }
-    console.warn('setToken called');
     const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
     document.cookie = `${this.tokenKey}=${encodeURIComponent(
       token
     )}; path=/; expires=${expires}; Secure; SameSite=Lax`;
   }
 
-  getDecodedToken(): JwtPayload | null {
+  getDecodedToken(): User | null {
     const token = this.getToken();
-    return token ? this.decodeToken(token) : null;
+    return token ? this.getDecodedAccessToken(token) : null;
   }
 
-  get currentUser(): Observable<JwtPayload | null> {
+  get currentUser(): Observable<User | null> {
     return this.currentUserSubject.asObservable();
   }
 
@@ -101,47 +130,41 @@ export class AuthService {
     return this.getDecodedToken()?.SCOPE?.toLowerCase() || null;
   }
 
-  private decodeToken(token: string): JwtPayload {
-    try {
-      const payload = token.split('.')[1];
-      const decodedPayload = atob(payload);
-      return JSON.parse(decodedPayload);
-    } catch (e) {
-      console.error('Invalid JWT Token', e);
-      return null!;
-    }
-  }
-
-  isAuthenticated(): boolean {
-    const token = this.getToken();
-    console.log('Checking authentication, token:', token);
-    if (!token) return false;
-
-    const decoded = this.decodeToken(token);
-    console.log('Decoded token:', decoded);
-    if (!decoded || typeof decoded.exp !== 'number') return false;
-
-    const currentTime = Math.floor(Date.now() / 1000);
-    return decoded.exp > currentTime;
+  autoLogout(expirationDuration: number) {
+    this.tokenExpirationTimer = setTimeout(() => {
+      console.log('Logging out');
+      this.logout();
+    }, expirationDuration);
+    this.deleteCookie(this.tokenKey);
   }
 
   private deleteCookie(name: string): void {
     document.cookie = `${name}=; Max-Age=0; path=/; Secure; SameSite=Lax`;
   }
 
-  private startAutoLogout(exp: number): void {
-    const now = Date.now();
-    const expiry = exp * 1000; // `exp` is in seconds, JS uses milliseconds
-    const timeout = expiry - now;
-
-    if (timeout > 0) {
-      this.logoutTimeout = setTimeout(() => this.logout(), timeout);
+  autoLogin() {
+    const token = this.getToken();
+    const user = this.handleAuthentication(token);
+    if (user) {
+      this.currentUserSubject.next(user);
+      const expirationDuration =
+        new Date(user.exp).getTime() - new Date().getTime();
+      this.autoLogout(expirationDuration);
+    } else {
+      return;
     }
   }
 
-  private clearAutoLogout(): void {
-    if (this.logoutTimeout) {
-      clearTimeout(this.logoutTimeout);
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      return false;
     }
+    const decoded = this.getDecodedAccessToken(token);
+    if (!decoded || !decoded.exp) {
+      return false;
+    }
+    const expirationDate = new Date(decoded.exp * 1000);
+    return expirationDate > new Date();
   }
 }
