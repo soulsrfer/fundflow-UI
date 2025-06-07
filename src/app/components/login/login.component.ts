@@ -63,6 +63,7 @@ export class LoginComponent {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
+        console.log('Login successful - redirecting to dashboard');
         this.router.navigate(['/dashboard']);// authGuard handles role-based redirection
       },
       error: (err) => {

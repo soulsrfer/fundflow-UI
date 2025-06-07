@@ -69,11 +69,19 @@ export class AuthService {
     const match = document.cookie.match(
       new RegExp('(^| )' + this.tokenKey + '=([^;]+)')
     );
+    if (!match) {
+      console.warn('No token found in cookies');
+      return null;
+    }
     return match ? decodeURIComponent(match[2]) : null;
   }
 
   setToken(token: string): void {
     // Set cookie with 1-hour expiry
+    if (!this.platform.isbrowser()) {
+      return;
+    }
+    console.warn('setToken called');
     const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
     document.cookie = `${this.tokenKey}=${encodeURIComponent(
       token
