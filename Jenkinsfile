@@ -13,7 +13,7 @@ pipeline {
         GIT_REPO          = 'git@github.com:soulsrfer/fundflow-UI.git'
         REGISTRY_URL      = 'docker.io/soulsrfer'                        // e.g. docker.io/your-org
         HOST_PORT        = '4200' // Port on the host machine
-        CONTAINER_PORT    = '80'   // Port inside the container
+        CONTAINER_PORT    = '4000'   // Port inside the container
     }
 
     stages {
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 echo 'Installing NPM dependencies and building Angular app...'
                 sh 'npm ci'
-                sh 'npm run build -- --configuration production'
+                sh 'npm run build:ssr'
             }
         }
 

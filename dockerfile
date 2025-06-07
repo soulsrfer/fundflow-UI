@@ -1,32 +1,25 @@
-# ─── Stage 1: Build Angular App ─────────────────────────────────────────────
+# ─── Stage 1: Build Angular SSR App ─────────────────────────────────────────────
 FROM node:22-alpine AS build
 WORKDIR /app
 
-# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy the rest of the source code
 COPY . .
+RUN npm run build:ssr
 
-# Build the Angular app using the correct configuration
-RUN npm run build -- --configuration production
+# ─── Stage 2: Run Angular SSR using Node ───────────────────────────────────────
+FROM node:22-alpine
 
-# ─── Stage 2: Serve using Nginx ─────────────────────────────────────────────
-FROM nginx:stable-alpine
+WORKDIR /app
 
-# Remove default Nginx website files
-RUN rm -rf /usr/share/nginx/html/*
+# Copy built browser + server bundles
+COPY --from=build /app/dist/fundflow-ui /app/dist/fundflow-ui
+COPY --from=build /app/package*.json ./
 
-# Copy only the client/browser build (where index.csr.html lives)
-COPY --from=build /app/dist/fundflow-ui/browser/. /usr/share/nginx/html/
+RUN npm ci --omit=dev
 
-# Rename the CSR entry-point to index.html so Nginx will serve it
-RUN mv /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html
+# Use SSR entry point
+CMD ["node", "dist/fundflow-ui/server/main.js"]
 
-# (Optional) Copy custom Nginx config for SPA routing
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port 80 and run Nginx in the foreground
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 4000
