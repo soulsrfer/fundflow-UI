@@ -6,6 +6,7 @@ import { PlatformService } from './platform.service';
 import { ApiResponse } from '@interfaces/api-response.interface';
 import { jwtDecode } from 'jwt-decode';
 import { User } from '../models/user.model';
+import { CookieService } from './cookie.service';
 @Injectable({
   providedIn: 'root',
 })
@@ -14,6 +15,7 @@ export class AuthService {
   private readonly apiUrl = environment.apiUrl; // 🔁 Replace with your actual backend API
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private platform = inject(PlatformService);
+  private cookieService = inject(CookieService);
   private tokenExpirationTimer: any;
 
   constructor(private http: HttpClient) {
@@ -96,14 +98,20 @@ export class AuthService {
     if (!this.platform.isbrowser()) {
       return null;
     }
-    const match = document.cookie.match(
-      new RegExp('(^| )' + this.tokenKey + '=([^;]+)')
-    );
-    if (!match) {
-      console.warn('No token found in cookies');
-      return null;
+
+    const cookieValue = this.cookieService.getCookie(this.tokenKey);
+    if (cookieValue) {
+      return cookieValue;
     }
-    return match ? decodeURIComponent(match[2]) : null;
+    return null;
+    // const match = document.cookie.match(
+    //   new RegExp('(^| )' + this.tokenKey + '=([^;]+)')
+    // );
+    // if (!match) {
+    //   console.warn('No token found in cookies');
+    //   return null;
+    // }
+    // return match ? decodeURIComponent(match[2]) : null;
   }
 
   setToken(token: string): void {
@@ -111,10 +119,12 @@ export class AuthService {
     if (!this.platform.isbrowser()) {
       return;
     }
-    const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
-    document.cookie = `${this.tokenKey}=${encodeURIComponent(
-      token
-    )}; path=/; expires=${expires}; Secure; SameSite=Lax`;
+
+    this.cookieService.setCookie(this.tokenKey, token, 1);
+    // const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
+    // document.cookie = `${this.tokenKey}=${encodeURIComponent(
+    //   token
+    // )}; path=/; expires=${expires}; Secure; SameSite=Lax`;
   }
 
   getDecodedToken(): User | null {
@@ -156,40 +166,51 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-  console.log('[Auth] Checking authentication status...');
-  
-  // Step 1: Get token from storage
-  const token = this.getToken();
-  console.log('[Auth] Token retrieved from storage:', token ? `${token.substring(0, 15)}...` : 'NULL');
+    console.log('[Auth] Checking authentication status...');
 
-  // Step 2: Check if token exists
-  if (!token) {
-    console.warn('[Auth] ❌ No token found - user not authenticated');
-    return false;
+    // Step 1: Get token from storage
+    const token = this.getToken();
+    console.log(
+      '[Auth] Token retrieved from storage:',
+      token ? `${token.substring(0, 15)}...` : 'NULL'
+    );
+
+    // Step 2: Check if token exists
+    if (!token) {
+      console.warn('[Auth] ❌ No token found - user not authenticated');
+      return false;
+    }
+
+    // Step 3: Decode token
+    const decoded = this.getDecodedAccessToken(token);
+    console.log('[Auth] Decoded token:', decoded);
+
+    // Step 4: Verify token structure
+    if (!decoded || !decoded.exp) {
+      console.error(
+        '[Auth] ❌ Invalid token structure - missing expiration or undecodable'
+      );
+      return false;
+    }
+
+    // Step 5: Calculate expiration time
+    const expirationDate = new Date(decoded.exp * 1000);
+    const currentDate = new Date();
+
+    console.log('[Auth] Token expiration:', expirationDate.toUTCString());
+    console.log('[Auth] Current server time:', currentDate.toUTCString());
+    console.log(
+      `[Auth] Token expires in: ${Math.floor(
+        (expirationDate.getTime() - currentDate.getTime()) / 1000
+      )} seconds`
+    );
+
+    // Step 6: Check expiration validity
+    const isValid = expirationDate > currentDate;
+    console.log(
+      `[Auth] Token validity: ${isValid ? '✅ VALID' : '❌ EXPIRED'}`
+    );
+
+    return isValid;
   }
-
-  // Step 3: Decode token
-  const decoded = this.getDecodedAccessToken(token);
-  console.log('[Auth] Decoded token:', decoded);
-
-  // Step 4: Verify token structure
-  if (!decoded || !decoded.exp) {
-    console.error('[Auth] ❌ Invalid token structure - missing expiration or undecodable');
-    return false;
-  }
-
-  // Step 5: Calculate expiration time
-  const expirationDate = new Date(decoded.exp * 1000);
-  const currentDate = new Date();
-  
-  console.log('[Auth] Token expiration:', expirationDate.toUTCString());
-  console.log('[Auth] Current server time:', currentDate.toUTCString());
-  console.log(`[Auth] Token expires in: ${Math.floor((expirationDate.getTime() - currentDate.getTime()) / 1000)} seconds`);
-
-  // Step 6: Check expiration validity
-  const isValid = expirationDate > currentDate;
-  console.log(`[Auth] Token validity: ${isValid ? '✅ VALID' : '❌ EXPIRED'}`);
-  
-  return isValid;
-}
 }
