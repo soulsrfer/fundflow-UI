@@ -1,13 +1,9 @@
+// src/app/cookie.service.ts
 import { isPlatformBrowser } from '@angular/common';
-import {
-  Inject,
-  Injectable,
-  InjectionToken,
-  Optional,
-  PLATFORM_ID,
-} from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID, Optional } from '@angular/core';
 import { Request, Response } from 'express';
 import { REQUEST, RESPONSE } from 'tokens';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -23,58 +19,68 @@ export class CookieService {
   }
 
   setCookie(name: string, value: string, hours = 1): void {
-    const expires = new Date(Date.now() + hours * 60 * 60 * 1000).toUTCString();
-    const cookieStr = `${name}=${encodeURIComponent(
-      value
-    )}; Path=/; Expires=${expires}; SameSite=Lax; Secure`;
+    console.log('Setting cookie:', name, 'Value:', value, 'Expires in hours:', hours);
+    try {
+      const expires = new Date(Date.now() + hours * 60 * 60 * 1000);
+      const cookieStr = `${name}=${encodeURIComponent(value)}; Path=/; Expires=${expires.toUTCString()}; SameSite=Lax${this.isBrowser ? '; Secure' : ''}`;
 
-    if (this.isBrowser) {
-      document.cookie = cookieStr;
-    } else if (this.response) {
-      // Append to existing Set-Cookie headers
-      const existing = this.response.getHeader('Set-Cookie');
-      const existingCookies: string[] = Array.isArray(existing)
-        ? existing
-        : typeof existing === 'string'
-        ? [existing]
-        : [];
-
-      this.response.setHeader('Set-Cookie', [...existingCookies, cookieStr]);
+      if (this.isBrowser) {
+        document.cookie = cookieStr;
+      } else if (this.response) {
+        this.response.cookie(name, value, {
+          expires,
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax',
+          path: '/'
+        });
+      }
+    } catch (error) {
+      console.error('CookieService setCookie error:', error);
     }
   }
 
   getCookie(name: string): string | undefined {
-    if (this.isBrowser) {
-      const matches = document.cookie.match(
-        new RegExp(`(?:^|; )${name}=([^;]*)`)
-      );
-      return matches ? decodeURIComponent(matches[1]) : undefined;
-    } else if (this.request) {
-      const raw = this.request.headers.cookie;
-      if (!raw) return undefined;
-      const cookies = Object.fromEntries(
-        raw.split('; ').map((c) => c.split('='))
-      );
-      return decodeURIComponent(cookies[name] || '');
+    console.log('Getting cookie:', name);
+    try {
+      if (this.isBrowser) {
+        return this.getBrowserCookie(name);
+      } 
+      return this.getServerCookie(name);
+    } catch (error) {
+      console.error('CookieService getCookie error:', error);
+      return undefined;
     }
-    return undefined;
+  }
+
+  private getBrowserCookie(name: string): string | undefined {
+    console.log('Getting cookie:', name);
+    const match = document.cookie.match(
+      new RegExp('(^| )' + name + '=([^;]+)')
+    );
+    return match ? decodeURIComponent(match[2]) : undefined;
+  }
+
+  private getServerCookie(name: string): string | undefined {
+    if (!this.request?.cookies) return undefined;
+    return this.request.cookies[name];
   }
 
   deleteCookie(name: string): void {
-    const expires = new Date(0).toUTCString();
-    const cookieStr = `${name}=; Path=/; Expires=${expires}; SameSite=Lax; Secure`;
-
-    if (this.isBrowser) {
-      document.cookie = cookieStr;
-    } else if (this.response) {
-      const existing = this.response.getHeader('Set-Cookie');
-      const existingCookies: string[] = Array.isArray(existing)
-        ? existing
-        : typeof existing === 'string'
-        ? [existing]
-        : [];
-
-      this.response.setHeader('Set-Cookie', [...existingCookies, cookieStr]);
+    console.log('Deleting cookie:', name);
+    try {
+      if (this.isBrowser) {
+        document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+      } else if (this.response) {
+        this.response.clearCookie(name, {
+          path: '/',
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax'
+        });
+      }
+    } catch (error) {
+      console.error('CookieService deleteCookie error:', error);
     }
   }
 }

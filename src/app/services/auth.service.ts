@@ -104,14 +104,7 @@ export class AuthService {
       return cookieValue;
     }
     return null;
-    // const match = document.cookie.match(
-    //   new RegExp('(^| )' + this.tokenKey + '=([^;]+)')
-    // );
-    // if (!match) {
-    //   console.warn('No token found in cookies');
-    //   return null;
-    // }
-    // return match ? decodeURIComponent(match[2]) : null;
+
   }
 
   setToken(token: string): void {
@@ -121,10 +114,6 @@ export class AuthService {
     }
 
     this.cookieService.setCookie(this.tokenKey, token, 1);
-    // const expires = new Date(Date.now() + 60 * 60 * 1000).toUTCString();
-    // document.cookie = `${this.tokenKey}=${encodeURIComponent(
-    //   token
-    // )}; path=/; expires=${expires}; Secure; SameSite=Lax`;
   }
 
   getDecodedToken(): User | null {
