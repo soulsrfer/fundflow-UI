@@ -54,15 +54,22 @@ export class CookieService {
   }
 
   private getBrowserCookie(name: string): string | undefined {
-    console.log('Getting cookie:', name);
+    console.log('Getting browser cookie:', name);
     const match = document.cookie.match(
       new RegExp('(^| )' + name + '=([^;]+)')
     );
+    console.log('Browser cookie match:', match);
     return match ? decodeURIComponent(match[2]) : undefined;
   }
 
   private getServerCookie(name: string): string | undefined {
+    console.log('Getting server cookie:', name);
     if (!this.request?.cookies) return undefined;
+    if (this.request.cookies[name]) {
+      console.log('Cookie found:', this.request.cookies[name]);
+    } else {
+      console.log('Cookie not found:', name);
+    }
     return this.request.cookies[name];
   }
 

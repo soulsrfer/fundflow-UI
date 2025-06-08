@@ -16,6 +16,7 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private platform = inject(PlatformService);
   private cookieService = inject(CookieService);
+  private localStorage = inject(Storage, { optional: true }) || localStorage;
   private tokenExpirationTimer: any;
 
   constructor(private http: HttpClient) {
@@ -99,7 +100,8 @@ export class AuthService {
       return null;
     }
 
-    const cookieValue = this.cookieService.getCookie(this.tokenKey);
+    // const cookieValue = this.cookieService.getCookie(this.tokenKey);
+    const cookieValue  = this.localStorage.getItem(this.tokenKey); // Fallback to localStorage if needed
     if (cookieValue) {
       return cookieValue;
     }
@@ -113,7 +115,8 @@ export class AuthService {
       return;
     }
 
-    this.cookieService.setCookie(this.tokenKey, token, 1);
+    // this.cookieService.setCookie(this.tokenKey, token, 1);
+    this.localStorage.setItem(this.tokenKey, token); // Fallback to localStorage if needed
   }
 
   getDecodedToken(): User | null {
