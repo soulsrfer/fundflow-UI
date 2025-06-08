@@ -1,19 +1,23 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { PlatformService } from '@service/platform.service';
 
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
-  const getCookie = (name: string): string | null => {
-    const match = document.cookie.match(
-      new RegExp('(^| )' + name + '=([^;]+)')
-    );
-    return match ? decodeURIComponent(match[2]) : null;
-  };
+  const storeage = inject(Storage, { optional: true }) || window.localStorage;
+  const platform = inject(PlatformService);
 
+  // Check if the platform is a browser
+  if (!platform.isbrowser()) {
+    return next(req);
+  }
+  
   // Skip adding token for /user/login requests
   if (req.url.includes('/user/login')) {
     return next(req);
   }
 
-  const token = getCookie('auth_token');
+  const token = storeage.getItem('auth_token');
+
 
   if (token) {
     const authReq = req.clone({

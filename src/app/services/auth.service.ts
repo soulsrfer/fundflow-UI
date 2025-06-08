@@ -6,7 +6,6 @@ import { PlatformService } from './platform.service';
 import { ApiResponse } from '@interfaces/api-response.interface';
 import { jwtDecode } from 'jwt-decode';
 import { User } from '../models/user.model';
-import { CookieService } from './cookie.service';
 @Injectable({
   providedIn: 'root',
 })
@@ -15,7 +14,6 @@ export class AuthService {
   private readonly apiUrl = environment.apiUrl; // 🔁 Replace with your actual backend API
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private platform = inject(PlatformService);
-  private cookieService = inject(CookieService);
   private localStorage = inject(Storage, { optional: true }) || localStorage;
   private tokenExpirationTimer: any;
 
@@ -75,7 +73,7 @@ export class AuthService {
   logout(): void {
     this.currentUserSubject.next(null);
     window.location.href = '/login';
-    this.deleteCookie(this.tokenKey);
+    this.localStorage.removeItem(this.tokenKey);
     if (this.tokenExpirationTimer) {
       clearTimeout(this.tokenExpirationTimer);
     }
@@ -100,8 +98,7 @@ export class AuthService {
       return null;
     }
 
-    // const cookieValue = this.cookieService.getCookie(this.tokenKey);
-    const cookieValue  = this.localStorage.getItem(this.tokenKey); // Fallback to localStorage if needed
+    const cookieValue  = this.localStorage.getItem(this.tokenKey);
     if (cookieValue) {
       return cookieValue;
     }
@@ -110,13 +107,10 @@ export class AuthService {
   }
 
   setToken(token: string): void {
-    // Set cookie with 1-hour expiry
     if (!this.platform.isbrowser()) {
       return;
     }
-
-    // this.cookieService.setCookie(this.tokenKey, token, 1);
-    this.localStorage.setItem(this.tokenKey, token); // Fallback to localStorage if needed
+    this.localStorage.setItem(this.tokenKey, token);
   }
 
   getDecodedToken(): User | null {
@@ -137,12 +131,10 @@ export class AuthService {
       console.log('Logging out');
       this.logout();
     }, expirationDuration);
-    this.deleteCookie(this.tokenKey);
+    this.localStorage.removeItem(this.tokenKey);
   }
 
-  private deleteCookie(name: string): void {
-    document.cookie = `${name}=; Max-Age=0; path=/; Secure; SameSite=Lax`;
-  }
+
 
   autoLogin() {
     const token = this.getToken();
