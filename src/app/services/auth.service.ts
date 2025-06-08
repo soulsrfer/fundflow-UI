@@ -156,15 +156,40 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    const token = this.getToken();
-    if (!token) {
-      return false;
-    }
-    const decoded = this.getDecodedAccessToken(token);
-    if (!decoded || !decoded.exp) {
-      return false;
-    }
-    const expirationDate = new Date(decoded.exp * 1000);
-    return expirationDate > new Date();
+  console.log('[Auth] Checking authentication status...');
+  
+  // Step 1: Get token from storage
+  const token = this.getToken();
+  console.log('[Auth] Token retrieved from storage:', token ? `${token.substring(0, 15)}...` : 'NULL');
+
+  // Step 2: Check if token exists
+  if (!token) {
+    console.warn('[Auth] ❌ No token found - user not authenticated');
+    return false;
   }
+
+  // Step 3: Decode token
+  const decoded = this.getDecodedAccessToken(token);
+  console.log('[Auth] Decoded token:', decoded);
+
+  // Step 4: Verify token structure
+  if (!decoded || !decoded.exp) {
+    console.error('[Auth] ❌ Invalid token structure - missing expiration or undecodable');
+    return false;
+  }
+
+  // Step 5: Calculate expiration time
+  const expirationDate = new Date(decoded.exp * 1000);
+  const currentDate = new Date();
+  
+  console.log('[Auth] Token expiration:', expirationDate.toUTCString());
+  console.log('[Auth] Current server time:', currentDate.toUTCString());
+  console.log(`[Auth] Token expires in: ${Math.floor((expirationDate.getTime() - currentDate.getTime()) / 1000)} seconds`);
+
+  // Step 6: Check expiration validity
+  const isValid = expirationDate > currentDate;
+  console.log(`[Auth] Token validity: ${isValid ? '✅ VALID' : '❌ EXPIRED'}`);
+  
+  return isValid;
+}
 }
