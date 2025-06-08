@@ -6,6 +6,7 @@ import { PlatformService } from './platform.service';
 import { ApiResponse } from '@interfaces/api-response.interface';
 import { jwtDecode } from 'jwt-decode';
 import { User } from '../models/user.model';
+import { Router } from '@angular/router';
 @Injectable({
   providedIn: 'root',
 })
@@ -14,10 +15,9 @@ export class AuthService {
   private readonly apiUrl = environment.apiUrl; // 🔁 Replace with your actual backend API
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private platform = inject(PlatformService);
-  private localStorage = inject(Storage, { optional: true }) || localStorage;
   private tokenExpirationTimer: any;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private router: Router) {
     if (this.platform.isbrowser()) {
       const token = this.getToken();
       if (token) {
@@ -72,8 +72,8 @@ export class AuthService {
 
   logout(): void {
     this.currentUserSubject.next(null);
-    window.location.href = '/login';
-    this.localStorage.removeItem(this.tokenKey);
+    this.router.navigateByUrl('/login');
+    localStorage.removeItem(this.tokenKey);
     if (this.tokenExpirationTimer) {
       clearTimeout(this.tokenExpirationTimer);
     }
@@ -98,7 +98,7 @@ export class AuthService {
       return null;
     }
 
-    const cookieValue  = this.localStorage.getItem(this.tokenKey);
+    const cookieValue  = localStorage.getItem(this.tokenKey);
     if (cookieValue) {
       return cookieValue;
     }
@@ -110,7 +110,7 @@ export class AuthService {
     if (!this.platform.isbrowser()) {
       return;
     }
-    this.localStorage.setItem(this.tokenKey, token);
+    localStorage.setItem(this.tokenKey, token);
   }
 
   getDecodedToken(): User | null {
@@ -131,7 +131,7 @@ export class AuthService {
       console.log('Logging out');
       this.logout();
     }, expirationDuration);
-    this.localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.tokenKey);
   }
 
 
@@ -150,14 +150,10 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    console.log('[Auth] Checking authentication status...');
 
     // Step 1: Get token from storage
     const token = this.getToken();
-    console.log(
-      '[Auth] Token retrieved from storage:',
-      token ? `${token.substring(0, 15)}...` : 'NULL'
-    );
+
 
     // Step 2: Check if token exists
     if (!token) {
@@ -167,7 +163,6 @@ export class AuthService {
 
     // Step 3: Decode token
     const decoded = this.getDecodedAccessToken(token);
-    console.log('[Auth] Decoded token:', decoded);
 
     // Step 4: Verify token structure
     if (!decoded || !decoded.exp) {
@@ -183,11 +178,6 @@ export class AuthService {
 
     console.log('[Auth] Token expiration:', expirationDate.toUTCString());
     console.log('[Auth] Current server time:', currentDate.toUTCString());
-    console.log(
-      `[Auth] Token expires in: ${Math.floor(
-        (expirationDate.getTime() - currentDate.getTime()) / 1000
-      )} seconds`
-    );
 
     // Step 6: Check expiration validity
     const isValid = expirationDate > currentDate;

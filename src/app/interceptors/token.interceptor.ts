@@ -3,7 +3,6 @@ import { inject } from '@angular/core';
 import { PlatformService } from '@service/platform.service';
 
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
-  const storeage = inject(Storage, { optional: true }) || window.localStorage;
   const platform = inject(PlatformService);
 
   // Check if the platform is a browser
@@ -16,7 +15,7 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
-  const token = storeage.getItem('auth_token');
+  const token = localStorage.getItem('auth_token');
 
 
   if (token) {
