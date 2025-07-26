@@ -64,7 +64,6 @@ export class MenuPermissionComponent implements OnInit {
   }
 
   initializeForm(item?: UserMenu) {
-    console.log('Initializing form with item:', item);
     this.menuForm = this.fb.group({
       id: new FormControl(item?.id ?? null),
       label: new FormControl(item?.label ?? '', [Validators.required]),
@@ -90,7 +89,6 @@ export class MenuPermissionComponent implements OnInit {
     this.menuService.getRoleOptions().subscribe({
       next: (response) => {
         this.roleOptions = response.data;
-        console.log('Role options initialized:', this.roleOptions);
       },
       error: (error) => {
         console.error('Error fetching role options:', error);
@@ -107,7 +105,6 @@ export class MenuPermissionComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log('Submitting form...');
     this.menuForm.markAllAsTouched();
     if (this.menuForm.invalid) {
       this.utilityService.markControlsAsDirtyAndTouched(this.menuForm);
@@ -182,7 +179,6 @@ export class MenuPermissionComponent implements OnInit {
     this.visibleDialog = true;
   }
   deleteMenuItem(id: string) {
-    console.log('Deleting menu item with id:', id);
     this.menuService.deleteMenuItem(id).subscribe({
       next: (response) => {
         console.log('Menu item deleted:', response);

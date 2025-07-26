@@ -15,6 +15,7 @@ interface LayoutState {
   configSidebarVisible?: boolean;
   staticMenuMobileActive?: boolean;
   menuHoverActive?: boolean;
+  userMenuActive?: boolean;
 }
 
 interface MenuChangeEvent {
@@ -40,6 +41,7 @@ export class LayoutService {
     configSidebarVisible: false,
     staticMenuMobileActive: false,
     menuHoverActive: false,
+    userMenuActive: false
   };
 
   layoutConfig = signal<layoutConfig>(this._config);
@@ -69,6 +71,8 @@ export class LayoutService {
       this.layoutState().overlayMenuActive ||
       this.layoutState().staticMenuMobileActive
   );
+
+  isUserMenuActive = computed<boolean>(() => this.layoutState().userMenuActive ?? false);
 
   isDarkTheme = computed(() => this.layoutConfig().darkTheme);
 
@@ -188,5 +192,13 @@ export class LayoutService {
 
   reset() {
     this.resetSource.next(true);
+  }
+
+  UserMenuToggle() {
+    this.layoutState.update((prev) => ({
+        ...prev,
+        userMenuActive: !this.layoutState().userMenuActive,
+      }));
+
   }
 }

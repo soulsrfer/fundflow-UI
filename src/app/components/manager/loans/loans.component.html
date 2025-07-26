@@ -1,1 +1,166 @@
-<p>loans works!</p>
+<div class="card">
+    <p-table [value]="loans" [tableStyle]="{ 'min-width': '60rem' }">
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-bold">Loans</span>
+        <p-button
+          label="Add Loan"
+          icon="pi pi-wallet"
+          (onClick)="addLoan()"
+          raised
+        />
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th>Member</th>
+        <th>Principal Amound</th>
+        <th>issued On</th>
+        <th>Icon</th>
+        <th>Joined Date</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-loan>
+      <tr>
+        <td>{{ loan.member.name }}</td>
+        <td>{{ loan.phone }}</td>
+        <td>{{ loan.email }}</td>
+        <td>{{ loan.joinedDate }}</td>
+        <td>{{ loan.status }}</td>
+        <td>
+          <p-button
+            icon="pi pi-pencil"
+            class="mr-2"
+            severity="secondary"
+            outlined
+            (onClick)="editLoan(loan)"
+          ></p-button>
+          <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            outlined
+            (onClick)="confirmDelete(loan)"
+          ></p-button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #footer>
+      In total there are {{ loans ? loans.length : 0 }} members.
+    </ng-template>
+  </p-table>
+</div>
+
+
+<p-drawer
+  header="Add Member"
+  [(visible)]="isDrawerVisible"
+  position="right"
+  blockScroll="true"
+  (onHide)="onHide()"
+  [style]="{ width: '25rem' }"
+>
+  <form [formGroup]="loanForm" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-2 mt-2 w-full">
+        <label for="name">Member</label>
+        <p-autocomplete formControlName="member" [suggestions]="memberSuggestions" (completeMethod)="search($event)"/>
+        <p-message
+          *ngIf="
+            memberControl?.invalid && (memberControl?.dirty || memberControl?.touched)
+          "
+          severity="error"
+          text="Name is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="phone">Amount</label>
+        <p-inputnumber id="amount" formControlName="principalAmount" ode="currency" inputId="currency-india" currency="INR" currencyDisplay="code" locale="en-IN"  />
+        <p-message
+          *ngIf="
+            amountControl?.invalid &&
+            (amountControl?.dirty || amountControl?.touched)
+          "
+          severity="error"
+          text="amount is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="email">Interest Rate</label>
+        <p-inputnumber id="email" formControlName="interestRate" suffix="%" [min]="0" [max]="100" />
+        <p-message
+          *ngIf="
+            rateControl?.invalid &&
+            (rateControl?.dirty || rateControl?.touched)
+          "
+          severity="error"
+          text="Interest rate is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="startDate">Start Date</label>
+        <p-datepicker
+          formControlName="startDate"
+          [showIcon]="true"
+          [iconDisplay]="'input'"
+          inputId="startDate"
+          [placeholder]="'Select a date'"
+          [dateFormat]="'dd/mm/yy'"
+          styleClass="w-full"
+        />
+        <p-message
+          *ngIf="
+            startDateControl?.invalid &&
+            (startDateControl?.dirty || startDateControl?.touched)
+          "
+          severity="error"
+          text="Start Date is required"
+        ></p-message>
+      </div>
+      <!-- <div class="flex flex-col gap-2 mt-2">
+        <label for="name">Address</label>
+        <textarea
+          rows="5"
+          cols="30"
+          pTextarea
+          formControlName="address"
+        ></textarea>
+      </div> -->
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="active">Status</label>
+        <p-selectbutton [options]="statusOptions"  formControlName="status" optionLabel="label" optionValue="value" />
+        <p-message
+          *ngIf="
+            statusControl?.invalid &&
+            (statusControl?.dirty || statusControl?.touched)
+          "
+          severity="error"
+          text="status is required"
+        ></p-message>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex items-center gap-2">
+      <button
+        pButton
+        (click)="onSubmit()"
+        label="Save"
+        icon="pi pi-user"
+        class="w-full"
+        outlined
+        [disabled]="loanForm.invalid"
+      ></button>
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-sign-out"
+        class="w-full"
+        severity="danger"
+        text
+        (click)="onHide()"
+      ></button>
+    </div>
+  </ng-template>
+</p-drawer>

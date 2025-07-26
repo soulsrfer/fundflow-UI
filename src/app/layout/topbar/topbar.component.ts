@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { StyleClassModule } from 'primeng/styleclass';
 import { MenuItem } from 'primeng/api';
 import { LayoutService } from '../layout.service';
-import { DrawerService } from '../../drawer/drawer.service';
 
 @Component({
   selector: 'app-topbar',
@@ -17,7 +16,6 @@ export class TopbarComponent {
   isVisible: boolean = false;
 
   constructor(public layoutService: LayoutService,
-    public drawerService: DrawerService
   ) {}
 
   toggleDarkMode() {

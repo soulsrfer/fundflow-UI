@@ -5,15 +5,18 @@ import { BadgeModule } from 'primeng/badge';
 import { AvatarModule } from 'primeng/avatar';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@service/auth.service';
+import { DrawerModule } from 'primeng/drawer';
+import { LayoutService } from 'src/app/layout/layout.service';
 @Component({
   selector: 'app-user-menu',
-  imports: [MenuModule, BadgeModule, AvatarModule, CommonModule],
+  imports: [MenuModule, BadgeModule, AvatarModule, CommonModule, DrawerModule],
   templateUrl: './user-menu.component.html',
   styleUrl: './user-menu.component.scss'
 })
 export class UserMenuComponent {
   items: MenuItem[] | undefined;
-  constructor(private auth: AuthService) {
+  constructor(private auth: AuthService,
+    public layoutService: LayoutService ) {
 
   }
   ngOnInit() {

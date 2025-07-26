@@ -3,13 +3,10 @@ import { Component, Renderer2, ViewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { TopbarComponent } from './topbar/topbar.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
-import { FooterComponent } from './footer/footer.component';
 import { filter, Subscription } from 'rxjs';
 import { LayoutService } from './layout.service';
 import { PlatformService } from '../services/platform.service';
-import { DrawerComponent } from "../drawer/drawer.component";
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { UserMenuComponent } from '@components/user-menu/user-menu.component';
 @Component({
   selector: 'app-layout',
   imports: [
@@ -18,8 +15,7 @@ import { MessageService } from 'primeng/api';
     TopbarComponent,
     SidebarComponent,
     // FooterComponent,
-    DrawerComponent,
-    ToastModule
+    UserMenuComponent,
 ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
@@ -33,6 +29,7 @@ export class LayoutComponent {
 
   @ViewChild(TopbarComponent) appTopBar!: TopbarComponent;
 
+  @ViewChild(UserMenuComponent) userMenu!: UserMenuComponent;
 
   constructor(
     public layoutService: LayoutService,

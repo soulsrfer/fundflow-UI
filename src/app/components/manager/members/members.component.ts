@@ -18,6 +18,9 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { UtilityService } from '@service/utility.service';
 import { TextareaModule } from 'primeng/textarea';
+import { MemberService } from '@service/member.service';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { DialogModule } from 'primeng/dialog';
 
 @Component({
   selector: 'app-members',
@@ -32,7 +35,9 @@ import { TextareaModule } from 'primeng/textarea';
     DatePickerModule,
     ToggleSwitchModule,
     TextareaModule,
-    
+    InputNumberModule,
+    FormsModule,
+    DialogModule
   ],
   templateUrl: './members.component.html',
   styleUrl: './members.component.scss',
@@ -43,22 +48,30 @@ export class MembersComponent implements OnInit {
   isDrawerVisible: boolean = false;
   memberForm: FormGroup = new FormGroup({});
   submissionError: string | null = null;
-  constructor(private utilityService: UtilityService) {
+  visibleDialog: boolean = false;
+  constructor(
+    private utilityService: UtilityService,
+    private memberService: MemberService
+  ) {
     this.initializeForm(null);
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.getMemberList();
+  }
 
   initializeForm(member: Member | null) {
+    console.log('selected memeber:', member);
     this.memberForm = new FormGroup({
       id: new FormControl(member ? member.id : null),
       name: new FormControl(member ? member.name : '', [Validators.required]),
       phone: new FormControl(member ? member.phone : '', [Validators.required]),
-      email: new FormControl(member ? member.email : '', [Validators.email,]),
+      email: new FormControl(member ? member.email : '', [Validators.email]),
       address: new FormControl(member ? member.address : null),
-      joinedDate: new FormControl(member ? member.joinedDate : new Date(), [
-        Validators.required,
-      ]),
+      joinedDate: new FormControl(
+        member ? new Date(member.joinedDate) : new Date(),
+        [Validators.required]
+      ),
       active: new FormControl(member ? member.active : true, [
         Validators.required,
       ]),
@@ -81,10 +94,23 @@ export class MembersComponent implements OnInit {
 
   addMember() {
     this.selectedMember = null;
+    this.openMemberDrawer();
+  }
+
+  editMember(member: Member) {
+    this.selectedMember = member;
+    this.openMemberDrawer();
+  }
+
+  openMemberDrawer() {
+    this.initializeForm(this.selectedMember);
     this.isDrawerVisible = true;
   }
-  editMember(member: Member) {}
-  confirmDelete(member: Member) {}
+
+  confirmDelete(member: Member) {
+    this.selectedMember = member;
+    this.visibleDialog = true;
+  }
 
   onHide() {
     this.isDrawerVisible = false;
@@ -94,10 +120,17 @@ export class MembersComponent implements OnInit {
     this.memberForm.markAllAsTouched();
     if (this.memberForm.valid) {
       this.selectedMember = this.memberForm.value as Member;
+      const rawValue = this.memberForm.get('joinedDate')?.value;
+      const date = new Date(rawValue);
+      const adjustedDate = new Date(
+        date.getTime() + Math.abs(date.getTimezoneOffset() * 60000)
+      );
+      this.selectedMember.joinedDate = adjustedDate;
       if (this.selectedMember.id) {
-        console.log('Updating member:', this.selectedMember);
+        this.updateMember(this.selectedMember.id);
       } else {
         console.log('Adding new member:', this.selectedMember);
+        this.creatMember();
       }
     } else {
       this.utilityService.markControlsAsDirtyAndTouched(this.memberForm);
@@ -105,4 +138,67 @@ export class MembersComponent implements OnInit {
       return;
     }
   }
+
+  creatMember() {
+    this.memberService.createMember(this.selectedMember as Member).subscribe({
+      next: (response) => {
+        console.log('Member added successfully:', response);
+        this.getMemberList();
+        this.selectedMember = null;
+        this.isDrawerVisible = false;
+      },
+      error: (error) => {
+        console.error('Error adding member:', error);
+      },
+    });
+  }
+
+  updateMember(id: number) {
+    this.memberService
+      .updateMember(id, this.selectedMember as Member)
+      .subscribe({
+        next: (response) => {
+          console.log('Member updated successfully', response);
+          this.isDrawerVisible = false;
+          this.getMemberList();
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+  }
+
+  getMemberList() {
+    this.memberService.getAllMembers().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.members = response.data;
+          console.log('Members fetched successfully:');
+        } else {
+          console.error('Failed to fetch members:', response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching members:', error);
+      },
+    });
+  }
+
+  deleteMember(id?: number) {
+    if (!id) return;
+    this.memberService.deleteMember(id).subscribe({
+      next: (response) => {
+        this.getMemberList();
+        this.onHideDialog();
+      },
+      error: (error) => {
+        console.error('Error deleting member:', error);
+      },
+    });
+  }
+
+  onHideDialog() {
+      this.visibleDialog = false;
+      this.selectedMember = null;
+    }
 }

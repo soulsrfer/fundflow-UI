@@ -15,6 +15,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { CommonModule } from '@angular/common';
+import { ToasterService } from '@service/toaster.service';
 
 @Component({
   selector: 'app-login',
@@ -42,7 +43,8 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private toaster: ToasterService
   ) {
     this.initializeLoginForm();
   }
@@ -57,7 +59,10 @@ export class LoginComponent {
   onSubmit() {
     this.error = null;
 
-    if (this.loginForm.invalid) return;
+    if (this.loginForm.invalid) {
+      this.toaster.showError('Please fill in all required fields.');
+      return;
+    }
 
     this.loading = true;
 
