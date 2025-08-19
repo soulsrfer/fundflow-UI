@@ -1,0 +1,333 @@
+<div class="card">
+  <form>
+    <div
+      class="grid grid-cols-1 gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+    >
+      <!-- Member -->
+      <div
+        class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full"
+      >
+        <label
+          for="member"
+          class="md:w-40 lg:w-48 flex-shrink-0 md:text-right pr-0 md:pr-4"
+        >
+          Member:
+        </label>
+        <p>{{ loan.memberName }}</p>
+        <!-- <input id="member" name="member" pInputText class="flex-1 w-full" /> -->
+      </div>
+
+      <!-- Principal Amount -->
+      <div
+        class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full"
+      >
+        <label
+          for="principal"
+          class="md:w-40 lg:w-48 flex-shrink-0 md:text-right pr-0 md:pr-4"
+        >
+          Principal Amount:
+        </label>
+        <P>{{ loan.principalAmount }}</P>
+        <!-- <input
+          id="principal"
+          name="principal"
+          pInputText
+          class="flex-1 w-full"
+        /> -->
+      </div>
+
+      <!-- Interest Rate -->
+      <div
+        class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full"
+      >
+        <label
+          for="interest"
+          class="md:w-40 lg:w-48 flex-shrink-0 md:text-right pr-0 md:pr-4"
+        >
+          Interest Rate:
+        </label>
+        <p>{{ loan.flatInterestRate }}%</p>
+        <!-- <input id="interest" name="interest" pInputText class="flex-1 w-full" /> -->
+      </div>
+
+      <!-- Total Repayment -->
+      <div
+        class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full"
+      >
+        <label
+          for="repayment"
+          class="md:w-40 lg:w-48 flex-shrink-0 md:text-right pr-0 md:pr-4"
+        >
+          Total Repayment:
+        </label>
+        <p>{{ loan.totalRepayment }}</p>
+        <!-- <input
+          id="repayment"
+          name="repayment"
+          pInputText
+          class="flex-1 w-full"
+        /> -->
+      </div>
+
+      <!-- Issued Date -->
+      <div
+        class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full"
+      >
+        <label
+          for="issued"
+          class="md:w-40 lg:w-48 flex-shrink-0 md:text-right pr-0 md:pr-4"
+        >
+          Issued Date:
+        </label>
+        <p>{{ loan.issuedDate | date }}</p>
+        <!-- <input id="issued" name="issued" pInputText class="flex-1 w-full" /> -->
+      </div>
+
+      <!-- End Date -->
+      <div
+        class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full"
+      >
+        <label
+          for="end"
+          class="md:w-40 lg:w-48 flex-shrink-0 md:text-right pr-0 md:pr-4"
+        >
+          End Date:
+        </label>
+        <p>{{ loan.endDate | date }}</p>
+        <!-- <input id="end" name="end" pInputText class="flex-1 w-full" /> -->
+      </div>
+      <div
+        class="flex flex-col md:flex-row items-start md:items-center gap-2 w-full"
+      >
+        <label
+          for="status"
+          class="md:w-40 lg:w-48 flex-shrink-0 md:text-right pr-0 md:pr-4"
+        >
+          Status:
+        </label>
+        <p-tag [severity]="loan.status === 'CLOSED' ? 'info' : 'danger'">
+          {{ loan.status | titlecase }}
+        </p-tag>
+        <!-- <input id="status" name="status" pInputText class="flex-1 w-full" /> -->
+      </div>
+    </div>
+  </form>
+
+  <p-divider></p-divider>
+
+  <!-- <div class="font-semibold text-xl">Schedule Entries</div> -->
+  <p-table [value]="entries" [tableStyle]="{ 'min-width': '60rem' }">
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-bold">Schedule Entries</span>
+        <!-- <p-button
+          label="Add Member"
+          icon="pi pi-user"
+          (onClick)="addMember()"
+          raised
+        /> -->
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th>Period</th>
+        <th>Due Date</th>
+        <th>Due Amount</th>
+        <th>Amount Paid</th>
+        <th>Status</th>
+        <th>Penalty</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-entry>
+      <tr>
+        <td>{{ entry.periodNumber }}</td>
+        <td>{{ entry.dueDate | date }}</td>
+        <td>{{ entry.dueAmount }}</td>
+        <td>{{ entry.amountPaid }}</td>
+        <td>
+          <p-tag [severity]="entry.status === 'PAID' ? 'info' : 'danger'">
+            {{ entry.status | titlecase }}
+          </p-tag>
+        </td>
+        <td>{{ entry.penalty }}</td>
+        <td>
+          <p-button
+            icon="pi pi-pencil"
+            class="mr-2"
+            severity="secondary"
+            outlined
+            (onClick)="editEntry(entry)"
+          ></p-button>
+          <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            outlined
+            (onClick)="confirmDelete(entry)"
+          ></p-button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #footer>
+      In total there are {{ entries ? entries.length : 0 }} Entries.
+    </ng-template>
+  </p-table>
+</div>
+
+<p-drawer
+  header="Edit Schedule Entry"
+  [(visible)]="isEntryDrawerVisible"
+  position="right"
+  blockScroll="true"
+  (onHide)="onHide()"
+  [style]="{ width: '25rem' }"
+>
+  <form [formGroup]="entryForm" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-4">
+      <!-- <div class="flex flex-col gap-2 mt-2">
+        <label for="loanId">loan Id:</label>
+        <p-inputnumber
+          id="loanId"
+          formControlName="loanId"
+          maxlength="10"
+          [useGrouping]="false"
+          [disabled]="true"
+        />
+        <p-message
+          *ngIf="
+            loanControl?.invalid && (loanControl?.dirty || loanControl?.touched)
+          "
+          severity="error"
+          text="loan id is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="periodNumber">Period Number</label>
+        <p-inputnumber
+          id="periodNumber"
+          formControlName="periodNumber"
+          maxlength="10"
+          [useGrouping]="false"
+          [disabled]="true"
+        />
+        <p-message
+          *ngIf="
+            periodNumberControl?.invalid &&
+            (periodNumberControl?.dirty || periodNumberControl?.touched)
+          "
+          severity="error"
+          text="Period Number is required"
+        ></p-message>
+      </div> -->
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="dueDate1">Due Date</label>
+        <p-datepicker
+          id="dueDate1"
+          formControlName="dueDate"
+          [showIcon]="true"
+          [iconDisplay]="'input'"
+          inputId="joinedDate"
+          [placeholder]="'Select a date'"
+          [dateFormat]="'dd/mm/yy'"
+          styleClass="w-full"
+        />
+        <p-message
+          *ngIf="
+            dueDateControl?.invalid &&
+            (dueDateControl?.dirty || dueDateControl?.touched)
+          "
+          severity="error"
+          text="Due Date is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="dueAmount1">Due Amount</label>
+        <p-inputnumber
+          id="dueAmount1"
+          formControlName="dueAmount"
+          maxlength="10"
+          [useGrouping]="false"
+        />
+        <p-message
+          *ngIf="
+            dueAmountControl?.invalid &&
+            (dueAmountControl?.dirty || dueAmountControl?.touched)
+          "
+          severity="error"
+          text="Due Amount is required"
+        ></p-message>
+      </div>
+
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="amountPaid1">Amount Paid</label>
+        <p-inputnumber
+          id="amountPaid1"
+          formControlName="amountPaid"
+          maxlength="10"
+          [useGrouping]="false"
+        />
+        <p-message
+          *ngIf="
+            amountPaidControl?.invalid &&
+            (amountPaidControl?.dirty || amountPaidControl?.touched)
+          "
+          severity="error"
+          text="Amount Paid is required"
+        ></p-message>
+      </div>
+
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="penalty1">Penalty</label>
+        <p-inputnumber
+          id="penalty1"
+          formControlName="penalty"
+          maxlength="10"
+          [useGrouping]="false"
+        />
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="status1">Status</label>
+        <p-selectbutton
+          [options]="entryStatusOptions"
+          formControlName="status"
+          optionLabel="label"
+          optionValue="value"
+          allowEmpty="false"
+          class="w-full"
+        />
+        <p-message
+          *ngIf="
+            statusControl?.invalid &&
+            (statusControl?.dirty || statusControl?.touched)
+          "
+          severity="error"
+          text="Status is required"
+        ></p-message>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex items-center gap-2">
+      <button
+        pButton
+        (click)="onSubmit()"
+        label="Save"
+        icon="pi pi-user"
+        class="w-full"
+        outlined
+        [disabled]="entryForm.invalid"
+      ></button>
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-sign-out"
+        class="w-full"
+        severity="danger"
+        text
+        (click)="onHide()"
+      ></button>
+    </div>
+  </ng-template>
+</p-drawer>

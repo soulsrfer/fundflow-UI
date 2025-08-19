@@ -26,7 +26,7 @@ export class AuthService {
     }
   }
 
-  login(payload: { username: string; password: string }): Observable<string> {
+  login(payload: { username: string; password: string; remember:boolean}): Observable<string> {
     return this.http.post<ApiResponse<string>>(`${this.apiUrl}/user/login`, payload).pipe(
       tap(response => {
         const token = response.data;

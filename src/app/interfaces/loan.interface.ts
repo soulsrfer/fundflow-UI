@@ -3,11 +3,17 @@ import { ScheduleEntry } from "./schedule-entry.interface";
 
 export interface Loan {
     id: number;
-    member: Member;
+    memberId: number;
+    memberName: string;
     issuedDate: Date;
+    endDate: Date;
     principalAmount: number;
-    monthlyInterestAmt: number;
+    flatInterestRate: number;
+    totalRepayment: number;
+    emiAmount: number;
+    numberOfInstallments: number;
     balanceRemaining: number;
     status: string; // 'OPEN', 'CLOSED'
     scheduleEntries: ScheduleEntry[];
+    member: Member;
 }

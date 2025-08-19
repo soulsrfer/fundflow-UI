@@ -201,4 +201,11 @@ export class LayoutService {
       }));
 
   }
+  CloseMenuToggle() {
+    this.layoutState.update((prev) => ({
+        ...prev,
+        userMenuActive: false,
+      }));
+
+  }
 }

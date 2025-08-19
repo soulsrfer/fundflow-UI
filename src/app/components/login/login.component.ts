@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -16,6 +16,7 @@ import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { CommonModule } from '@angular/common';
 import { ToasterService } from '@service/toaster.service';
+import { LayoutService } from 'src/app/layout/layout.service';
 
 @Component({
   selector: 'app-login',
@@ -33,7 +34,7 @@ import { ToasterService } from '@service/toaster.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
 
   loading: boolean = false;
@@ -44,16 +45,20 @@ export class LoginComponent {
     private authService: AuthService,
     private fb: FormBuilder,
     private router: Router,
-    private toaster: ToasterService
+    private toaster: ToasterService,
+    private layoutService: LayoutService
   ) {
     this.initializeLoginForm();
+  }
+  ngOnInit(): void {
+    this.layoutService.CloseMenuToggle();
   }
 
   initializeLoginForm(): void {
     this.loginForm = this.fb.group({
       username: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required]),
-      checked: new FormControl(false),
+      remember: new FormControl(false,[Validators.required]),
     });
   }
   onSubmit() {

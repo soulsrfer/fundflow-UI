@@ -28,6 +28,13 @@ export const managerRoutes: Routes = [
                     ),
             },
             {
+                path: 'loans/:id',
+                loadComponent: () =>
+                    import('@components/manager/loans/edit-loan/edit-loan.component').then(
+                        (m) => m.EditLoanComponent
+                    ),
+            },
+            {
                 path: 'contributions',
                 loadComponent: () =>
                     import('@components/manager/contributions/contributions.component').then(

@@ -1,1 +1,175 @@
-<p>schedule-entries works!</p>
+<div class="card">
+    <p-table [value]="entries" [tableStyle]="{ 'min-width': '60rem' }">
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-bold">Schedule Entries</span>
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th>Name</th>
+        <th>Due Date</th>
+        <th>Due Amount</th>
+        <th>Amount Paid</th>
+        <th>Status</th>
+        <th>Penalty</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-entry>
+      <tr>
+        <td>{{ entry.memberName }}</td>
+        <td>{{ entry.dueDate | date }}</td>
+        <td>{{ entry.dueAmount }}</td>
+        <td>{{ entry.amountPaid }}</td>
+        <td>
+          <p-tag [severity]="entry.status === 'PAID' ? 'info' : 'danger'">
+            {{ entry.status | titlecase }}
+          </p-tag>
+        </td>
+        <td>{{ entry.penalty }}</td>
+        <td>
+          <p-button
+            icon="pi pi-pencil"
+            class="mr-2"
+            severity="secondary"
+            outlined
+            (onClick)="editEntry(entry)"
+          ></p-button>
+          <!-- <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            outlined
+            (onClick)="confirmDelete(entry)"
+          ></p-button> -->
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #footer>
+      In total there are {{ entries ? entries.length : 0 }} Entries.
+    </ng-template>
+  </p-table>
+</div>
+
+<p-drawer
+  header="Edit Schedule Entry"
+  [(visible)]="isDrawerVisible"
+  position="right"
+  blockScroll="true"
+  (onHide)="onHide()"
+  [style]="{ width: '25rem' }"
+>
+  <form [formGroup]="entryForm" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="dueDate1">Due Date</label>
+        <p-datepicker
+          id="dueDate1"
+          formControlName="dueDate"
+          [showIcon]="true"
+          [iconDisplay]="'input'"
+          inputId="joinedDate"
+          [placeholder]="'Select a date'"
+          [dateFormat]="'dd/mm/yy'"
+          styleClass="w-full"
+        />
+        <p-message
+          *ngIf="
+            dueDateControl?.invalid &&
+            (dueDateControl?.dirty || dueDateControl?.touched)
+          "
+          severity="error"
+          text="Due Date is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="dueAmount1">Due Amount</label>
+        <p-inputnumber
+          id="dueAmount1"
+          formControlName="dueAmount"
+          maxlength="10"
+          [useGrouping]="false"
+        />
+        <p-message
+          *ngIf="
+            dueAmountControl?.invalid &&
+            (dueAmountControl?.dirty || dueAmountControl?.touched)
+          "
+          severity="error"
+          text="Due Amount is required"
+        ></p-message>
+      </div>
+
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="amountPaid1">Amount Paid</label>
+        <p-inputnumber
+          id="amountPaid1"
+          formControlName="amountPaid"
+          maxlength="10"
+          [useGrouping]="false"
+        />
+        <p-message
+          *ngIf="
+            amountPaidControl?.invalid &&
+            (amountPaidControl?.dirty || amountPaidControl?.touched)
+          "
+          severity="error"
+          text="Amount Paid is required"
+        ></p-message>
+      </div>
+
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="penalty1">Penalty</label>
+        <p-inputnumber
+          id="penalty1"
+          formControlName="penalty"
+          maxlength="10"
+          [useGrouping]="false"
+        />
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="status1">Status</label>
+        <p-selectbutton
+          [options]="entryStatusOptions"
+          formControlName="status"
+          optionLabel="label"
+          optionValue="value"
+          allowEmpty="false"
+          class="w-full"
+        />
+        <p-message
+          *ngIf="
+            statusControl?.invalid &&
+            (statusControl?.dirty || statusControl?.touched)
+          "
+          severity="error"
+          text="Status is required"
+        ></p-message>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex items-center gap-2">
+      <button
+        pButton
+        (click)="onSubmit()"
+        label="Save"
+        icon="pi pi-user"
+        class="w-full"
+        outlined
+        [disabled]="entryForm.invalid"
+      ></button>
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-sign-out"
+        class="w-full"
+        severity="danger"
+        text
+        (click)="onHide()"
+      ></button>
+    </div>
+  </ng-template>
+</p-drawer>

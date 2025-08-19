@@ -5,4 +5,6 @@ export interface Contribution {
     member: Member
     date: Date;
     amount: number;
+    memberName: String;
+    memberId: number;
 }
