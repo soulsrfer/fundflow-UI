@@ -58,4 +58,4 @@ export const managerRoutes: Routes = [
         ]
             
     }
-]
+];
