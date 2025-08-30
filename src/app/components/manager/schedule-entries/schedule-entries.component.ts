@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpParams } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import {
   FormControl,
@@ -16,7 +17,7 @@ import { DrawerModule } from 'primeng/drawer';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { MessageModule } from 'primeng/message';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 
 @Component({
@@ -48,6 +49,13 @@ export class ScheduleEntriesComponent implements OnInit {
     { label: 'Paid', value: 'PAID' },
   ];
 
+  first = 0;
+  rowsPerPage = 50;
+  totalRecords = 0;
+  showLoader = false;
+  defaultSortField: string = 'dueDate';
+  defaultSortOrder: number = 1;
+
   constructor(
     private entryService: ScheduleEntryService,
     private utilityService: UtilityService
@@ -55,9 +63,7 @@ export class ScheduleEntriesComponent implements OnInit {
     this.initializeEntryForm(null);
   }
 
-  ngOnInit(): void {
-    this.getSheduleEntries();
-  }
+  ngOnInit(): void {}
 
   get dueDateControl() {
     return this.entryForm.get('dueDate') as FormControl;
@@ -85,7 +91,6 @@ export class ScheduleEntriesComponent implements OnInit {
   }
 
   initializeEntryForm(entry: ScheduleEntry | null) {
-    console.log('selected Entry:', entry);
     this.entryForm = new FormGroup({
       id: new FormControl(entry ? entry.id : 0, [Validators.required]),
       loanId: new FormControl(entry ? entry.loanId : 0, [Validators.required]),
@@ -106,18 +111,6 @@ export class ScheduleEntriesComponent implements OnInit {
     });
   }
 
-  getSheduleEntries() {
-    this.entryService.getAllScheduleEntries().subscribe({
-      next: (response) => {
-        this.entries = response.data;
-        this.onHide();
-      },
-      error: (error) => {
-        console.log('error while fetching ScheduleEntries: ', error);
-      },
-    });
-  }
-
   onHide() {
     this.isDrawerVisible = false;
     this.entryForm.reset();
@@ -131,25 +124,55 @@ export class ScheduleEntriesComponent implements OnInit {
       this.selectedEntry.dueDate = this.utilityService.adjustDate(
         this.selectedEntry.dueDate
       );
-      console.log('updated Entry:', this.selectedEntry);
       this.updateEntry(this.selectedEntry.id);
     } else {
       this.utilityService.markControlsAsDirtyAndTouched(this.entryForm);
-      console.error('Form is invalid');
       return;
     }
   }
 
   updateEntry(id: number) {
-    this.entryService.updateEntry(id, this.selectedEntry as ScheduleEntry).subscribe({
-      next:(response) => {
-        console.log('Entry updated: ', response);
-        this.getSheduleEntries();
+    this.entryService
+      .updateEntry(id, this.selectedEntry as ScheduleEntry)
+      .subscribe({
+        next: (response) => {
+          const event = this.createLazyLoadEvent();
+          this.loadScheduleEntries(event);
+          this.onHide();
+        },
+        error: (error) => {
+          console.error('error updating entry:', error);
+        },
+      });
+  }
+
+  loadScheduleEntries(event: TableLazyLoadEvent) {
+    this.showLoader = true;
+    this.first = event.first ?? 0;
+    const params = this.utilityService.tableLazyLoadEventToHttpParams(event);
+
+    this.entryService.getAllScheduleEntries(params).subscribe({
+      next: (response) => {
+        this.entries = response.data.rows;
+        this.totalRecords = response.data.totalItems;
         this.onHide();
       },
-      error:(error) => {
-        console.error("error updating entry:",error)
-      }
+      error: (error) => {
+        console.log('error while fetching ScheduleEntries: ', error);
+      },
+      complete: () => {
+        this.showLoader = false;
+      },
     });
+  }
+
+  createLazyLoadEvent() {
+    return {
+      first: this.first,
+      rows: this.rowsPerPage,
+      sortField: this.defaultSortField,
+      sortOrder: this.defaultSortOrder,
+      filters: {},
+    } as TableLazyLoadEvent;
   }
 }

@@ -1,5 +1,8 @@
 <div class="card">
-    <p-table [value]="entries" [tableStyle]="{ 'min-width': '60rem' }">
+    <p-table [value]="entries" [tableStyle]="{ 'min-width': '60rem' }"
+      [paginator]="true" [first]="first" [rows]="rowsPerPage" [totalRecords]="totalRecords"
+          [lazy]="true" (onLazyLoad)="loadScheduleEntries($event)" [loading]="showLoader"
+          [sortField]="defaultSortField" [sortOrder]="defaultSortOrder">
     <ng-template #caption>
       <div class="flex items-center justify-between">
         <span class="text-xl font-bold">Schedule Entries</span>
@@ -8,7 +11,9 @@
     <ng-template #header>
       <tr>
         <th>Name</th>
-        <th>Due Date</th>
+        <th>Due Date
+          <p-sortIcon field="dueDate"/>
+        </th>
         <th>Due Amount</th>
         <th>Amount Paid</th>
         <th>Status</th>
@@ -47,7 +52,7 @@
     </ng-template>
 
     <ng-template #footer>
-      In total there are {{ entries ? entries.length : 0 }} Entries.
+      In total there are {{ totalRecords ? totalRecords : 0 }} Entries.
     </ng-template>
   </p-table>
 </div>

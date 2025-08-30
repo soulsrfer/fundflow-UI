@@ -1,1 +1,174 @@
-<p>transactions works!</p>
+<div class="card">
+  <p-table [value]="transactions" [tableStyle]="{ 'min-width': '60rem' }"
+    [paginator]="true" [first]="first" [rows]="rowsPerPage" [totalRecords]="totalRecords"
+    [lazy]="true" (onLazyLoad)="loadTransactions($event)" [loading]="showLoader"
+    [sortField]="defaultSortField" [sortOrder]="defaultSortOrder">
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-bold">Transaction</span>
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th>Name</th>
+        <th>Amount</th>
+        <th >Date
+          <p-sortIcon field="date"/>
+        </th>
+        <th>Type</th>
+        <th>Status</th>
+        <!-- <th>Reference</th> -->
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-transaction>
+      <tr>
+        <td>{{ transaction.memberName }}</td>
+        <td>{{ transaction.amount }}</td>
+        <td>{{ transaction.date | date }}</td>
+        <td>{{ transaction.type }}</td>
+        <td>
+          <p-tag [severity]="transaction.status === 'SUCCESS' ? 'info' : 'danger'">
+            {{ transaction.status | titlecase }}
+          </p-tag>
+        </td>
+        <!-- <td>{{ transaction.referenceId }}</td> -->
+        <!-- <td>{{ transaction.penalty }}</td> -->
+        <td>
+          <p-button
+            icon="pi pi-pencil"
+            class="mr-2"
+            severity="secondary"
+            outlined
+            (onClick)="editTransaction(transaction)"
+          ></p-button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #footer>
+      In total there are {{ totalRecords ? totalRecords : 0 }}  transactions.
+    </ng-template>
+  </p-table>
+</div>
+
+<p-drawer
+  header="Update Transaction"
+  [(visible)]="isDrawerVisible"
+  position="right"
+  blockScroll="true"
+  (onHide)="onHide()"
+  [style]="{ width: '25rem' }"
+>
+  <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="dueDate1">Date</label>
+        <p-datepicker
+          id="dueDate1"
+          formControlName="date"
+          [showIcon]="true"
+          [iconDisplay]="'input'"
+          inputId="joinedDate"
+          [placeholder]="'Select a date'"
+          [dateFormat]="'dd/mm/yy'"
+          styleClass="w-full"
+        />
+        <p-message
+          *ngIf="
+            dateControl?.invalid && (dateControl?.dirty || dateControl?.touched)
+          "
+          severity="error"
+          text="Due Date is required"
+        ></p-message>
+      </div>
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="dueAmount1">Amount</label>
+        <p-inputnumber
+          id="dueAmount1"
+          formControlName="amount"
+          maxlength="10"
+          [useGrouping]="false"
+        />
+        <p-message
+          *ngIf="
+            amountControl?.invalid &&
+            (amountControl?.dirty || amountControl?.touched)
+          "
+          severity="error"
+          text="Due Amount is required"
+        ></p-message>
+      </div>
+
+      <!-- <div class="flex flex-col gap-2 mt-2">
+        <label for="amountPaid1">Amount Paid</label>
+        <p-inputnumber
+          id="amountPaid1"
+          formControlName="amountPaid"
+          maxlength="10"
+          [useGrouping]="false"
+        />
+        <p-message
+          *ngIf="
+            amountPaidControl?.invalid &&
+            (amountPaidControl?.dirty || amountPaidControl?.touched)
+          "
+          severity="error"
+          text="Amount Paid is required"
+        ></p-message>
+      </div> -->
+
+      <!-- <div class="flex flex-col gap-2 mt-2">
+        <label for="penalty1">Penalty</label>
+        <p-inputnumber
+          id="penalty1"
+          formControlName="penalty"
+          maxlength="10"
+          [useGrouping]="false"
+        />
+      </div> -->
+      <div class="flex flex-col gap-2 mt-2">
+        <label for="status1">Status</label>
+        <p-selectbutton
+          [options]="transactionStatusOptions"
+          formControlName="status"
+          optionLabel="label"
+          optionValue="value"
+          allowEmpty="false"
+          class="w-full"
+        />
+        <!-- <p-message
+          *ngIf="
+            statusControl?.invalid &&
+            (statusControl?.dirty || statusControl?.touched)
+          "
+          severity="error"
+          text="Status is required"
+        ></p-message> -->
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <div class="flex items-center gap-2">
+      <button
+        pButton
+        (click)="onSubmit()"
+        label="Save"
+        icon="pi pi-user"
+        class="w-full"
+        outlined
+        [disabled]="transactionForm.invalid"
+      ></button>
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-sign-out"
+        class="w-full"
+        severity="danger"
+        text
+        (click)="onHide()"
+      ></button>
+    </div>
+  </ng-template>
+</p-drawer>

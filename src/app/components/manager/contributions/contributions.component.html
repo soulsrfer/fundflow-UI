@@ -1,5 +1,8 @@
 <div class="card">
-  <p-table [value]="contributions" [tableStyle]="{ 'min-width': '60rem' }">
+  <p-table [value]="contributions" [tableStyle]="{ 'min-width': '60rem' }"
+    [paginator]="true" [first]="first" [rows]="rowsPerPage" [totalRecords]="totalRecords"
+    [lazy]="true" (onLazyLoad)="loadContributions($event)" [loading]="showLoader"
+    [sortField]="defaultSortField" [sortOrder]="defaultSortOrder">
     <ng-template #caption>
       <div class="flex items-center justify-between">
         <span class="text-xl font-bold">Contributions</span>
@@ -15,7 +18,9 @@
       <tr>
         <th>Name</th>
         <th>Amount</th>
-        <th>date</th>
+        <th>date
+          <p-sortIcon field="date"/>
+        </th>
         <th>Actions</th>
       </tr>
     </ng-template>
@@ -43,7 +48,7 @@
     </ng-template>
     <ng-template #footer>
       In total there are
-      {{ contributions ? contributions.length : 0 }} contributions.
+      {{ totalRecords ? totalRecords : 0 }} contributions.
     </ng-template>
   </p-table>
 </div>

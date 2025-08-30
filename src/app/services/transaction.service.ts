@@ -1,39 +1,27 @@
 import { Injectable } from '@angular/core';
-import { ApiResponse } from '@interfaces/api-response.interface';
-import { ScheduleEntry } from '@interfaces/schedule-entry.interface';
 import { ApiService } from './api.service';
 import { map, Observable } from 'rxjs';
+import { ApiResponse } from '@interfaces/api-response.interface';
+import { Transaction } from '@interfaces/transaction.interface';
 import { HttpParams } from '@angular/common/http';
 import { TableResponse } from '@interfaces/table-response.interface';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ScheduleEntryService {
+export class TransactionService {
   constructor(private api: ApiService) {}
-
   get endpoint() {
-    const base = 'schedule-entries';
+    const base = 'transactions';
     return {
       base,
       byId: (id: number) => `${base}/${id}`,
-
     };
   }
 
-  updateEntry(
-    id: number,
-    entry: ScheduleEntry
-  ): Observable<ApiResponse<ScheduleEntry>> {
-    return this.api.put<ApiResponse<ScheduleEntry>>(
-      this.endpoint.byId(id),
-      entry
-    );
-  }
-
-  getAllScheduleEntries(
+  fetchAllTransactions(
     params?: HttpParams
-  ): Observable<ApiResponse<TableResponse<ScheduleEntry>>> {
+  ): Observable<ApiResponse<TableResponse<Transaction>>> {
     return this.api.get<ApiResponse<any>>(this.endpoint.base, params);
   }
 }

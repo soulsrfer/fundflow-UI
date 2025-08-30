@@ -1,3 +1,4 @@
+import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   AbstractControl,
@@ -5,6 +6,7 @@ import {
   FormControl,
   FormGroup,
 } from '@angular/forms';
+import { TableLazyLoadEvent } from 'primeng/table';
 
 @Injectable({
   providedIn: 'root',
@@ -51,5 +53,54 @@ export class UtilityService {
     return new Date(
         date.getTime() + Math.abs(date.getTimezoneOffset() * 60000)
       );
+  }
+
+  tableLazyLoadEventToHttpParams(event: TableLazyLoadEvent): HttpParams {
+
+   const first = event.first ?? 0;
+      const rows = event.rows ?? 10;
+      const safeRows = rows <= 0 ? 10 : rows; // avoid divide-by-zero
+      const page = Math.floor(first / safeRows);
+  
+      // Handle sorting parameters
+      const sortField = event.sortField ?? 'id';
+      const sortOrder = event.sortOrder === 1 ? 'asc' : 'desc';
+  
+      const paramsObj: Record<string, string | string[]> = {
+        page: String(page),
+        rows: String(safeRows),
+        sortField,
+        sortOrder,
+      };
+  
+      // Handle filter parameters
+      if (event.filters) {
+        for (const [field, meta] of Object.entries(event.filters)) {
+          const value =
+            (meta as any)?.value ?? (Array.isArray(meta) ? meta : undefined);
+          if (value !== undefined && value !== null && value !== '') {
+            paramsObj[field] = Array.isArray(value)
+              ? value.map((v) => String(v))
+              : String(value);
+          }
+        }
+      }
+
+    return new HttpParams({ fromObject: paramsObj });
+  }
+
+  createLazyLoadEvent(
+    first?: number,
+    rows?: number,
+    sortField?: string,
+    sortOrder?: number
+  ): TableLazyLoadEvent {
+    return {
+      first: first ?? 0,
+      rows: rows ?? 10,
+      sortField: sortField ?? 'id',
+      sortOrder: sortOrder ?? 1,
+      filters: {},
+    } as TableLazyLoadEvent;
   }
 }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Member } from '@interfaces/member.interface';
 import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { MessageModule } from 'primeng/message';
 import {
   Form,
@@ -37,7 +37,7 @@ import { DialogModule } from 'primeng/dialog';
     TextareaModule,
     InputNumberModule,
     FormsModule,
-    DialogModule
+    DialogModule,
   ],
   templateUrl: './members.component.html',
   styleUrl: './members.component.scss',
@@ -49,6 +49,13 @@ export class MembersComponent implements OnInit {
   memberForm: FormGroup = new FormGroup({});
   submissionError: string | null = null;
   visibleDialog: boolean = false;
+  first = 0;
+  rowsPerPage = 50;
+  totalRecords = 0;
+  showLoader = false;
+  defaultSortField: string = 'joinedDate';
+  defaultSortOrder: number = -1;
+
   constructor(
     private utilityService: UtilityService,
     private memberService: MemberService
@@ -57,7 +64,6 @@ export class MembersComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getMemberList();
   }
 
   initializeForm(member: Member | null) {
@@ -143,7 +149,8 @@ export class MembersComponent implements OnInit {
     this.memberService.createMember(this.selectedMember as Member).subscribe({
       next: (response) => {
         console.log('Member added successfully:', response);
-        this.getMemberList();
+        const event = this.utilityService.createLazyLoadEvent(this.first, this.rowsPerPage, this.defaultSortField, this.defaultSortOrder);
+        this.loadMembers(event);
         this.selectedMember = null;
         this.isDrawerVisible = false;
       },
@@ -159,8 +166,14 @@ export class MembersComponent implements OnInit {
       .subscribe({
         next: (response) => {
           console.log('Member updated successfully', response);
+          const event = this.utilityService.createLazyLoadEvent(
+            this.first,
+            this.rowsPerPage,
+            this.defaultSortField,
+            this.defaultSortOrder
+          );
+          this.loadMembers(event);
           this.isDrawerVisible = false;
-          this.getMemberList();
         },
         error: (error) => {
           console.log(error);
@@ -168,27 +181,17 @@ export class MembersComponent implements OnInit {
       });
   }
 
-  getMemberList() {
-    this.memberService.getAllMembers().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.members = response.data;
-          console.log('Members fetched successfully:');
-        } else {
-          console.error('Failed to fetch members:', response.message);
-        }
-      },
-      error: (error) => {
-        console.error('Error fetching members:', error);
-      },
-    });
-  }
-
   deleteMember(id?: number) {
     if (!id) return;
     this.memberService.deleteMember(id).subscribe({
       next: (response) => {
-        this.getMemberList();
+        const event = this.utilityService.createLazyLoadEvent(
+          this.first,
+          this.rowsPerPage,
+          this.defaultSortField,
+          this.defaultSortOrder
+        );
+        this.loadMembers(event);
         this.onHideDialog();
       },
       error: (error) => {
@@ -198,7 +201,33 @@ export class MembersComponent implements OnInit {
   }
 
   onHideDialog() {
-      this.visibleDialog = false;
-      this.selectedMember = null;
-    }
+    this.visibleDialog = false;
+    this.selectedMember = null;
+  }
+
+  loadMembers(event: TableLazyLoadEvent) {
+    this.showLoader = true;
+    this.first = event.first ?? 0;
+    const params = this.utilityService.tableLazyLoadEventToHttpParams(event);
+
+    this.memberService.getAllMembers(params).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.members = response.data.rows;
+          this.totalRecords = response.data.totalItems;
+          console.log('Members fetched successfully:');
+        } else {
+          console.error('Failed to fetch members:', response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching members:', error);
+      },
+      complete: () => {
+        this.showLoader = false;
+      },
+    });
+  }
+
+  
 }

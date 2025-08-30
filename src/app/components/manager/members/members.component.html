@@ -1,5 +1,8 @@
 <div class="card">
-  <p-table [value]="members" [tableStyle]="{ 'min-width': '60rem' }">
+  <p-table [value]="members" [tableStyle]="{ 'min-width': '60rem' }"
+    [paginator]="true" [first]="first" [rows]="rowsPerPage" [totalRecords]="totalRecords"
+    [lazy]="true" (onLazyLoad)="loadMembers($event)" [loading]="showLoader"
+    [sortField]="defaultSortField" [sortOrder]="defaultSortOrder">
     <ng-template #caption>
       <div class="flex items-center justify-between">
         <span class="text-xl font-bold">Members</span>
@@ -16,7 +19,9 @@
         <th>Name</th>
         <th>Phone</th>
         <th>email</th>
-        <th>Joined Date</th>
+        <th>Joined Date
+          <p-sortIcon field="joinedDate"/>
+        </th>
         <th>Status</th>
         <th>Actions</th>
       </tr>

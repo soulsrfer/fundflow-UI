@@ -3,6 +3,8 @@ import { ApiService } from './api.service';
 import { Member } from '@interfaces/member.interface';
 import { ApiResponse } from '@interfaces/api-response.interface';
 import { Observable } from 'rxjs';
+import { TableResponse } from '@interfaces/table-response.interface';
+import { HttpParams, HttpResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -12,23 +14,19 @@ export class MemberService {
   constructor(private api: ApiService) { }
 
   get endpoint() {
-    const base = 'member';
+    const base = 'members';
     return {
       base,
-      create: `${base}/create`,
-      list: `${base}/list`,
       byId: (id: number) => `${base}/${id}`,
-      update: (id: number) => `${base}/${id}/update`,
-      delete: (id: number) => `${base}/${id}/delete`
     };
   }
   
   createMember(member: Member): Observable<ApiResponse<Member>> {
-    return this.api.post<ApiResponse<Member>>(this.endpoint.create, member);
+    return this.api.post<ApiResponse<Member>>(this.endpoint.base, member);
   }
 
-  getAllMembers(): Observable<ApiResponse<Member[]>> {
-    return this.api.get<ApiResponse<Member[]>>(this.endpoint.list);
+  getAllMembers(params?: HttpParams): Observable<ApiResponse<TableResponse<Member>>> {
+    return this.api.get<ApiResponse<TableResponse<Member>>>(this.endpoint.base, params);
   }
 
   updateMember(id:number, member:Member):Observable<ApiResponse<Member[]>> {
@@ -36,6 +34,6 @@ export class MemberService {
   }
 
   deleteMember(id: number): Observable<ApiResponse<Member>> {
-    return this.api.delete<ApiResponse<Member>>(this.endpoint.delete(id));
+    return this.api.delete<ApiResponse<Member>>(this.endpoint.byId(id));
   }
 }

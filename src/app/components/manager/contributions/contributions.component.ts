@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpParams } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import {
   FormControl,
@@ -22,7 +23,7 @@ import { DialogModule } from 'primeng/dialog';
 import { DrawerModule } from 'primeng/drawer';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { MessageModule } from 'primeng/message';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 @Component({
@@ -52,6 +53,14 @@ export class ContributionsComponent implements OnInit {
   allMembers: Member[] = [];
   visibleDialog: boolean = false;
   selectedContribution: Contribution | null = null;
+
+  first = 0;
+  rowsPerPage = 50;
+  totalRecords = 0;
+  showLoader = false;
+  defaultSortField: string = 'date';
+  defaultSortOrder: number = -1;
+
   constructor(
     private memberService: MemberService,
     private utilityService: UtilityService,
@@ -60,7 +69,6 @@ export class ContributionsComponent implements OnInit {
     this.initializeContributionForm(null);
   }
   ngOnInit(): void {
-    this.getContributionList();
     this.getMemberList();
   }
   get memberControl() {
@@ -112,13 +120,14 @@ export class ContributionsComponent implements OnInit {
     this.contributionForm.markAllAsTouched();
     if (this.contributionForm.valid) {
       this.selectedContribution = this.contributionForm.value as Contribution;
-      // this.selectedContribution.date = this.utilityService.adjustDate(this.selectedContribution.date);
+      this.selectedContribution.date = this.utilityService.adjustDate(
+        this.selectedContribution.date
+      );
       this.selectedContribution.id
         ? this.updateContribution(this.selectedContribution.id)
         : this.createContribution();
     } else {
       this.utilityService.markControlsAsDirtyAndTouched(this.contributionForm);
-      console.error('Form is invalid');
       return;
     }
   }
@@ -128,7 +137,8 @@ export class ContributionsComponent implements OnInit {
       .createContribution(this.selectedContribution as Contribution)
       .subscribe({
         next: () => {
-          this.getContributionList();
+          const event = this.createLazyLoadEvent();
+          this.loadContributions(event);
           this.onHide();
         },
         error: (error) => {
@@ -141,7 +151,8 @@ export class ContributionsComponent implements OnInit {
       .updateContribution(id, this.selectedContribution as Contribution)
       .subscribe({
         next: () => {
-          this.getContributionList();
+          const event = this.createLazyLoadEvent();
+          this.loadContributions(event);
           this.onHide();
         },
         error: (error) => {
@@ -161,21 +172,16 @@ export class ContributionsComponent implements OnInit {
     );
   }
 
-  getContributionList() {
-    this.contributionService.getAllContributions().subscribe({
-      next: (response) => {
-        this.contributions = response.data;
-      },
-      error: (error) => {
-        console.error('error while fetching contributions:', error);
-      },
-    });
-  }
   getMemberList() {
-    this.memberService.getAllMembers().subscribe({
+    const params = this.utilityService.tableLazyLoadEventToHttpParams({
+      first: 0,
+      rows: 100,
+    } as TableLazyLoadEvent);
+
+    this.memberService.getAllMembers(params).subscribe({
       next: (response) => {
         if (response.success) {
-          this.allMembers = response.data;
+          this.allMembers = response.data.rows;
         } else {
           console.error('Failed to fetch members:', response.message);
         }
@@ -193,13 +199,43 @@ export class ContributionsComponent implements OnInit {
 
   deleteContribution(id: number) {
     this.contributionService.deleteContribution(id).subscribe({
-      next:() => {
-        this.getContributionList();
+      next: () => {
+        const event = this.createLazyLoadEvent();
+        this.loadContributions(event);
         this.onHideDialog();
       },
-      error:(error) => {
-        console.log("error while deleting contribution:",error);
-      }
+      error: (error) => {
+        console.log('error while deleting contribution:', error);
+      },
     });
+  }
+
+  loadContributions(event: TableLazyLoadEvent) {
+    console.log('Lazy load event:', event);
+    this.showLoader = true;
+    this.first = event.first ?? 0;
+    const params = this.utilityService.tableLazyLoadEventToHttpParams(event);
+    this.contributionService.getAllContributions(params).subscribe({
+      next: (response) => {
+        this.contributions = response.data.rows;
+        this.totalRecords = response.data.totalItems;
+      },
+      error: (error) => {
+        console.error('error while fetching contributions:', error);
+      },
+      complete: () => {
+        this.showLoader = false;
+      },
+    });
+  }
+
+  createLazyLoadEvent() {
+    return {
+      first: this.first,
+      rows: this.rowsPerPage,
+      sortField: this.defaultSortField,
+      sortOrder: this.defaultSortOrder,
+      filters: {},
+    } as TableLazyLoadEvent;
   }
 }

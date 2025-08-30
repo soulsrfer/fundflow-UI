@@ -13,7 +13,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { DrawerModule } from 'primeng/drawer';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
-import { TableModule } from 'primeng/table';
+import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import {
   AutoCompleteCompleteEvent,
@@ -64,6 +64,13 @@ export class LoansComponent implements OnInit {
     { label: 'Close', value: 'CLOSED' },
   ];
 
+  first = 0;
+  rowsPerPage = 50;
+  totalRecords = 0;
+  showLoader = false;
+  defaultSortField: string = 'issuedDate';
+  defaultSortOrder: number = -1;
+
   constructor(
     private memberService: MemberService,
     private utilityService: UtilityService,
@@ -75,7 +82,6 @@ export class LoansComponent implements OnInit {
 
   ngOnInit(): void {
     this.getMemberList();
-    this.getAllLoans();
   }
 
   initializeForm(loan: Loan | null) {
@@ -129,10 +135,11 @@ export class LoansComponent implements OnInit {
   }
 
   getMemberList() {
-    this.memberService.getAllMembers().subscribe({
+    const params = this.utilityService.tableLazyLoadEventToHttpParams({first:0,rows:100} as TableLazyLoadEvent);
+    this.memberService.getAllMembers(params).subscribe({
       next: (response) => {
         if (response.success) {
-          this.allMembers = response.data;
+          this.allMembers = response.data.rows;
         } else {
           console.error('Failed to fetch members:', response.message);
         }
@@ -190,25 +197,11 @@ export class LoansComponent implements OnInit {
     }
   }
 
-  getAllLoans() {
-    this.loanService.getAllLoans().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.loans = response.data;
-        } else {
-          console.error('Failed to fetch loans:', response.message);
-        }
-      },
-      error: (error) => {
-        console.error('Error fetching loans:', error);
-      },
-    });
-  }
-
   createLoan() {
     this.loanService.createLoan(this.selectedLoan as Loan).subscribe({
       next: (response) => {
-        this.getAllLoans();
+        const event = this.createLazyLoadEvent();
+        this.loadLoans(event);
         this.selectedLoan = null;
         this.isDrawerVisible = false;
       },
@@ -222,7 +215,8 @@ export class LoansComponent implements OnInit {
     this.loanService.updateLoan(id, this.selectedLoan as Loan).subscribe({
       next: (response) => {
         this.isDrawerVisible = false;
-        this.getAllLoans();
+        const event = this.createLazyLoadEvent();
+        this.loadLoans(event);
       },
       error: (error) => {
         console.error('Error updating loan:', error);
@@ -234,7 +228,8 @@ export class LoansComponent implements OnInit {
     if (!id)return;
     this.loanService.deleteLoan(id).subscribe({
       next: (response) => {
-        this.getAllLoans();
+        const event = this.createLazyLoadEvent();
+        this.loadLoans(event);
         this.selectedLoan = null;
         this.visibleDialog = false;
       },
@@ -247,5 +242,37 @@ export class LoansComponent implements OnInit {
   onHideDialog() {
     this.visibleDialog = false;
     this.selectedLoan = null;
+  }
+
+  loadLoans(event: TableLazyLoadEvent) {
+    this.showLoader = true;
+    this.first = event.first ?? 0;
+    const params = this.utilityService.tableLazyLoadEventToHttpParams(event);
+    this.loanService.getAllLoans(params).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.loans = response.data.rows;
+          this.totalRecords = response.data.totalItems;
+        } else {
+          console.error('Failed to fetch loans:', response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching loans:', error);
+      },
+      complete: () => {
+        this.showLoader = false;
+      },
+    });
+  }
+
+  createLazyLoadEvent() {
+    return {
+      first: this.first,
+      rows: this.rowsPerPage,
+      sortField: this.defaultSortField,
+      sortOrder: this.defaultSortOrder,
+      filters: {},
+    } as TableLazyLoadEvent;
   }
 }

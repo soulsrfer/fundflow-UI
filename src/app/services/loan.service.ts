@@ -3,6 +3,8 @@ import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@interfaces/api-response.interface';
 import { Loan } from '@interfaces/loan.interface';
+import { TableResponse } from '@interfaces/table-response.interface';
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -22,8 +24,8 @@ export class LoanService {
     return this.api.post<ApiResponse<Loan>>(this.endpoint.base, loan);
   }
 
-  getAllLoans(): Observable<ApiResponse<Loan[]>> {
-    return this.api.get<ApiResponse<Loan[]>>(this.endpoint.base);
+  getAllLoans(params?: HttpParams): Observable<ApiResponse<TableResponse<Loan>>> {
+    return this.api.get<ApiResponse<TableResponse<Loan>>>(this.endpoint.base, params);
   }
 
   updateLoan(id: number, loan: Loan): Observable<ApiResponse<Loan>> {
