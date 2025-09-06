@@ -15,7 +15,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitch';
 import { UtilityService } from '@service/utility.service';
 import { TextareaModule } from 'primeng/textarea';
 import { MemberService } from '@service/member.service';
@@ -229,5 +229,14 @@ export class MembersComponent implements OnInit {
     });
   }
 
-  
+  onChangeActive(event: ToggleSwitchChangeEvent, memberId: number) {
+    this.memberService.patchActive(memberId, event.checked as boolean).subscribe({
+      next: (response) => {
+        
+      },
+      error: (error) => {
+        console.error('Error updating member active status:', error);
+      }
+    });
+  }
 }

@@ -22,7 +22,7 @@
         <th>Joined Date
           <p-sortIcon field="joinedDate"/>
         </th>
-        <th>Status</th>
+        <th>Active</th>
         <th>Actions</th>
       </tr>
     </ng-template>
@@ -33,7 +33,7 @@
         <td>{{ member.email }}</td>
         <td>{{ member.joinedDate | date}} </td>
         <td>
-          <p-toggleswitch [(ngModel)]="member.active" readonly="true"/>
+          <p-toggleswitch [(ngModel)]="member.active" (onChange)="onChangeActive($event, member.id)"/>
         </td>
         <td>
           <p-button

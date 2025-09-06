@@ -1,8 +1,18 @@
 <div class="card">
-    <p-table [value]="entries" [tableStyle]="{ 'min-width': '60rem' }"
-      [paginator]="true" [first]="first" [rows]="rowsPerPage" [totalRecords]="totalRecords"
-          [lazy]="true" (onLazyLoad)="loadScheduleEntries($event)" [loading]="showLoader"
-          [sortField]="defaultSortField" [sortOrder]="defaultSortOrder">
+  <p-table
+    [value]="entries"
+    [tableStyle]="{ 'min-width': '60rem' }"
+    [paginator]="true"
+    [first]="first"
+    [rows]="rowsPerPage"
+    [totalRecords]="totalRecords"
+    [lazy]="true"
+    (onLazyLoad)="loadScheduleEntries($event)"
+    [loading]="showLoader"
+    [sortField]="defaultSortField"
+    [sortOrder]="defaultSortOrder"
+    [filters]="{status: [{ value: defaultStatus, matchMode: 'equals', operator: 'and' }]}"
+    #entryTable>
     <ng-template #caption>
       <div class="flex items-center justify-between">
         <span class="text-xl font-bold">Schedule Entries</span>
@@ -11,12 +21,37 @@
     <ng-template #header>
       <tr>
         <th>Name</th>
-        <th>Due Date
-          <p-sortIcon field="dueDate"/>
+        <th>
+          Due Date
+          <p-sortIcon field="dueDate" />
         </th>
         <th>Due Amount</th>
         <th>Amount Paid</th>
-        <th>Status</th>
+        <th>
+          <div class="flex items-center">
+            Status
+            <p-columnFilter field="status" matchMode="equals" display="menu" [showMatchModes]="false" [showOperator]="false" [showAddButton]="false" [showClearButton]="false" [showApplyButton]="false">
+              <ng-template #filter let-value let-filter="filterCallback">
+                <p-select
+                  [(ngModel)]="defaultStatus"
+                  [options]="statusOptions"
+                  (onChange)="filter($event.value)"
+                  placeholder="Select One"
+                  styleClass="w-full"
+                  optionLabel="label"
+                  optionValue="value"
+                >
+                  <ng-template let-option #item>
+                    <p-tag
+                      [value]="option.label"
+                      [severity]="getSeverity(option.value)"
+                    ></p-tag>
+                  </ng-template>
+                </p-select>
+              </ng-template>
+            </p-columnFilter>
+          </div>
+        </th>
         <th>Penalty</th>
         <th>Actions</th>
       </tr>

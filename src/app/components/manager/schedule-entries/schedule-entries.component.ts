@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -16,10 +16,11 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { DrawerModule } from 'primeng/drawer';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { MessageModule } from 'primeng/message';
+import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { TableLazyLoadEvent, TableModule } from 'primeng/table';
+import { Table, TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
-
+import { LabelValue } from '@interfaces/label-value.interface';
 @Component({
   selector: 'app-schedule-entries',
   imports: [
@@ -35,11 +36,14 @@ import { TagModule } from 'primeng/tag';
     MessageModule,
     InputNumberModule,
     SelectButtonModule,
+    SelectModule,
   ],
   templateUrl: './schedule-entries.component.html',
   styleUrl: './schedule-entries.component.scss',
 })
 export class ScheduleEntriesComponent implements OnInit {
+  @ViewChild('entryTable') entryTable: Table | undefined; 
+  @ViewChild('filter') filter!: ElementRef;
   entries: ScheduleEntry[] = [];
   selectedEntry: ScheduleEntry | null = null;
   isDrawerVisible: boolean = false;
@@ -55,6 +59,13 @@ export class ScheduleEntriesComponent implements OnInit {
   showLoader = false;
   defaultSortField: string = 'dueDate';
   defaultSortOrder: number = 1;
+
+  defaultStatus: string = 'PENDING';
+  statusOptions: LabelValue[] = [
+    { label: 'All', value: '' },
+    { label: 'Pending', value: 'PENDING' },
+    { label: 'Paid', value: 'PAID' },
+  ];
 
   constructor(
     private entryService: ScheduleEntryService,
@@ -149,6 +160,8 @@ export class ScheduleEntriesComponent implements OnInit {
   loadScheduleEntries(event: TableLazyLoadEvent) {
     this.showLoader = true;
     this.first = event.first ?? 0;
+    
+    console.log('lazy load event', event);
     const params = this.utilityService.tableLazyLoadEventToHttpParams(event);
 
     this.entryService.getAllScheduleEntries(params).subscribe({
@@ -174,5 +187,21 @@ export class ScheduleEntriesComponent implements OnInit {
       sortOrder: this.defaultSortOrder,
       filters: {},
     } as TableLazyLoadEvent;
+  }
+
+  getSeverity(status: string) {
+    switch (status.toLowerCase()) {
+      case 'cancelled':
+        return 'danger';
+
+      case 'paid':
+        return 'success';
+
+      case 'pending':
+        return 'warn';
+
+      default:
+        return 'secondary';
+    }
   }
 }

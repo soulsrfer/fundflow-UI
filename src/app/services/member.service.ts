@@ -36,4 +36,8 @@ export class MemberService {
   deleteMember(id: number): Observable<ApiResponse<Member>> {
     return this.api.delete<ApiResponse<Member>>(this.endpoint.byId(id));
   }
+
+  patchActive(id: number, active: boolean): Observable<ApiResponse<Member>>{
+    return this.api.patch<ApiResponse<Member>>(this.endpoint.byId(id), {active});
+  }
 }
