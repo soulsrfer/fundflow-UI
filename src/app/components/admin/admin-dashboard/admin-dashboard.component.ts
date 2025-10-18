@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [ButtonModule],
+  imports: [ButtonModule, RouterModule],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
@@ -17,12 +17,6 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.notify.add({
-      severity: 'info',
-      summary: 'Admin Dashboard',
-      detail: 'Welcome to the Admin Dashboard!',
-      life: 3000 // Duration in milliseconds
-    });
   }
 
 navigateTo(route: string): void {

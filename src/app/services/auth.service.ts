@@ -5,7 +5,7 @@ import { environment } from '@environments/environment';
 import { PlatformService } from './platform.service';
 import { ApiResponse } from '@interfaces/api-response.interface';
 import { jwtDecode } from 'jwt-decode';
-import { User } from '../models/user.model';
+import { UserModel } from '../models/user.model';
 import { Router } from '@angular/router';
 import { catchError, map, tap } from 'rxjs/operators';
 
@@ -15,7 +15,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 export class AuthService {
   private readonly tokenKey = 'auth_token';
   private readonly apiUrl = environment.apiUrl;
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private currentUserSubject = new BehaviorSubject<UserModel | null>(null);
   private platform = inject(PlatformService);
   private tokenExpirationTimer: any;
 
@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   login(payload: { username: string; password: string; remember:boolean}): Observable<string> {
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/user/login`, payload).pipe(
+    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/users/login`, payload).pipe(
       tap(response => {
         const token = response.data;
         console.log('Login successful, token received:', token);
@@ -43,7 +43,7 @@ export class AuthService {
     if (!token) return null;
     
     const decodedToken = this.getDecodedAccessToken(token);
-    const user = new User(
+    const user = new UserModel(
       decodedToken.SCOPE,
       decodedToken.USERID,
       decodedToken.sub,
@@ -94,12 +94,12 @@ export class AuthService {
     this.platform.isbrowser() && localStorage.setItem(this.tokenKey, token);
   }
 
-  getDecodedToken(): User | null {
+  getDecodedToken(): UserModel | null {
     const token = this.getToken();
     return token ? this.getDecodedAccessToken(token) : null;
   }
 
-  get currentUser(): Observable<User | null> {
+  get currentUser(): Observable<UserModel | null> {
     return this.currentUserSubject.asObservable();
   }
 

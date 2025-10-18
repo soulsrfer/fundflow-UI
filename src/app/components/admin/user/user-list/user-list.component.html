@@ -1,0 +1,78 @@
+<div class="card">
+  <p-table
+    [value]="users"
+    [tableStyle]="{ 'min-width': '60rem' }"
+    [paginator]="true"
+    [first]="first"
+    [rows]="rowsPerPage"
+    [totalRecords]="totalRecords"
+    [lazy]="true"
+    (onLazyLoad)="loadUser($event)"
+    [loading]="showLoader"
+    [sortField]="defaultSortField"
+    [sortOrder]="defaultSortOrder"
+    [filters]="{
+      role: [{ value: defaultRole, matchMode: 'equals', operator: 'and' }]
+    }"
+    #userTable
+  >
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-bold">Users</span>
+        <p-button
+          label="Add User"
+          class="mr-2"
+          icon="pi pi-user"
+          raised
+          [routerLink]="['/dashboard/admin/users/add']"
+        ></p-button>
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Active</th>
+        <th>Expired</th>
+        <th>Locked</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-user>
+      <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.role }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.phone }}</td>
+        <td>
+          <p-tag *ngIf="user.isActive"
+            [value]="user.isActive ? 'Active' : 'Inactive'"
+            [severity]="user.isActive ? 'success' : 'danger'"
+          ></p-tag>
+        </td>
+        <td>{{ user.isExpired }}</td>
+        <td>{{ user.isLocked }}</td>
+        <td>
+          <p-button
+            icon="pi pi-pencil"
+            class="mr-2"
+            severity="secondary"
+            outlined
+            (onClick)="editUser(user)"
+          ></p-button>
+          <!-- <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            outlined
+            (onClick)="confirmDelete(entry)"
+          ></p-button> -->
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #footer>
+      In total there are {{ totalRecords ? totalRecords : 0 }} Entries.
+    </ng-template>
+  </p-table>
+</div>

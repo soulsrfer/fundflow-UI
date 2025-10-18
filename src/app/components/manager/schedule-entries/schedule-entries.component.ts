@@ -161,7 +161,6 @@ export class ScheduleEntriesComponent implements OnInit {
     this.showLoader = true;
     this.first = event.first ?? 0;
     
-    console.log('lazy load event', event);
     const params = this.utilityService.tableLazyLoadEventToHttpParams(event);
 
     this.entryService.getAllScheduleEntries(params).subscribe({

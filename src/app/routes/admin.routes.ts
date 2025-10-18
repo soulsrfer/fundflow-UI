@@ -10,9 +10,9 @@ export const adminRoutes: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import('@components/admin/admin-dashboard/admin-dashboard.component').then(
-            (m) => m.AdminDashboardComponent
-          ),
+          import(
+            '@components/admin/admin-dashboard/admin-dashboard.component'
+          ).then((m) => m.AdminDashboardComponent),
       },
       {
         path: 'permissions/menu-permission',
@@ -20,6 +20,37 @@ export const adminRoutes: Routes = [
           import(
             '@components/admin/permissions/menu-permission/menu-permission.component'
           ).then((m) => m.MenuPermissionComponent),
+      },
+      {
+        path: 'users',
+        children: [
+          {
+            path: '',
+            redirectTo: 'list',
+            pathMatch: 'full',
+          },
+          {
+            path: 'list',
+            loadComponent: () =>
+              import(
+                '@components/admin/user/user-list/user-list.component'
+              ).then((m) => m.UserListComponent),
+          },
+          {
+            path: 'add', // for creating new user
+            loadComponent: () =>
+              import(
+                '@components/admin/user/user-add-edit/user-add-edit.component'
+              ).then((m) => m.UserAddEditComponent),
+          },
+          {
+            path: 'edit/:id', // for editing existing user
+            loadComponent: () =>
+              import(
+                '@components/admin/user/user-add-edit/user-add-edit.component'
+              ).then((m) => m.UserAddEditComponent),
+          },
+        ],
       },
     ],
   },

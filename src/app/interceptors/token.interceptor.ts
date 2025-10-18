@@ -11,7 +11,7 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   }
   
   // Skip adding token for /user/login requests
-  if (req.url.includes('/user/login')) {
+  if (req.url.includes('/users/login')) {
     return next(req);
   }
 
