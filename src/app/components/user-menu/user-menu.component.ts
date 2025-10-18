@@ -3,13 +3,13 @@ import { MenuItem } from 'primeng/api';
 import { MenuModule } from 'primeng/menu';
 import { BadgeModule } from 'primeng/badge';
 import { AvatarModule } from 'primeng/avatar';
-import { CommonModule } from '@angular/common';
+
 import { AuthService } from '@service/auth.service';
 import { DrawerModule } from 'primeng/drawer';
 import { LayoutService } from 'src/app/layout/layout.service';
 @Component({
   selector: 'app-user-menu',
-  imports: [MenuModule, BadgeModule, AvatarModule, CommonModule, DrawerModule],
+  imports: [MenuModule, BadgeModule, AvatarModule, DrawerModule],
   templateUrl: './user-menu.component.html',
   styleUrl: './user-menu.component.scss'
 })

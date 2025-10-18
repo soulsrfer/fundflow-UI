@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -14,14 +14,13 @@ import { TagModule } from 'primeng/tag';
 @Component({
   selector: 'app-user-list',
   imports: [
-    CommonModule,
     TableModule,
     SelectModule,
     TagModule,
     ButtonModule,
     FormsModule,
-    RouterModule,
-  ],
+    RouterModule
+],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss',
 })

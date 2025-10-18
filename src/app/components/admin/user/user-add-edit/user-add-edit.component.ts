@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
@@ -18,14 +18,13 @@ import { PasswordModule } from 'primeng/password';
 @Component({
   selector: 'app-user-add-edit',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     InputTextModule,
     ButtonModule,
     DropdownModule,
     InputNumberModule,
-    PasswordModule,
-  ],
+    PasswordModule
+],
   templateUrl: './user-add-edit.component.html',
   styleUrl: './user-add-edit.component.scss',
 })

@@ -15,7 +15,7 @@
       role: [{ value: defaultRole, matchMode: 'equals', operator: 'and' }]
     }"
     #userTable
-  >
+    >
     <ng-template #caption>
       <div class="flex items-center justify-between">
         <span class="text-xl font-bold">Users</span>
@@ -46,10 +46,12 @@
         <td>{{ user.email }}</td>
         <td>{{ user.phone }}</td>
         <td>
-          <p-tag *ngIf="user.isActive"
-            [value]="user.isActive ? 'Active' : 'Inactive'"
-            [severity]="user.isActive ? 'success' : 'danger'"
-          ></p-tag>
+          @if (user.isActive) {
+            <p-tag
+              [value]="user.isActive ? 'Active' : 'Inactive'"
+              [severity]="user.isActive ? 'success' : 'danger'"
+            ></p-tag>
+          }
         </td>
         <td>{{ user.isExpired }}</td>
         <td>{{ user.isLocked }}</td>
@@ -62,17 +64,17 @@
             (onClick)="editUser(user)"
           ></p-button>
           <!-- <p-button
-            icon="pi pi-trash"
-            severity="danger"
-            outlined
-            (onClick)="confirmDelete(entry)"
-          ></p-button> -->
-        </td>
-      </tr>
-    </ng-template>
+          icon="pi pi-trash"
+          severity="danger"
+          outlined
+          (onClick)="confirmDelete(entry)"
+        ></p-button> -->
+      </td>
+    </tr>
+  </ng-template>
 
-    <ng-template #footer>
-      In total there are {{ totalRecords ? totalRecords : 0 }} Entries.
-    </ng-template>
-  </p-table>
+  <ng-template #footer>
+    In total there are {{ totalRecords ? totalRecords : 0 }} Entries.
+  </ng-template>
+</p-table>
 </div>

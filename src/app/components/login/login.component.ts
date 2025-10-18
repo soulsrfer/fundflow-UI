@@ -14,7 +14,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
-import { CommonModule } from '@angular/common';
+
 import { ToasterService } from '@service/toaster.service';
 import { LayoutService } from 'src/app/layout/layout.service';
 
@@ -28,9 +28,8 @@ import { LayoutService } from 'src/app/layout/layout.service';
     FormsModule,
     RouterModule,
     RippleModule,
-    CommonModule,
-    ReactiveFormsModule,
-  ],
+    ReactiveFormsModule
+],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })

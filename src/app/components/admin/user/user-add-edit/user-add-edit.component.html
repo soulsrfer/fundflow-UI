@@ -14,156 +14,167 @@
           formControlName="fullName"
           class="w-full"
           placeholder="Enter full name"
-        />
-        <small
-          *ngIf="
+          />
+          @if (
             userForm.get('fullName')?.touched &&
             userForm.get('fullName')?.invalid
-          "
-          class="text-red-500"
-          >Full name is required</small
-        >
-      </div>
-      <div class="flex flex-col w-full">
-        <label class="block mb-1 text-sm font-medium">Username</label>
-        <input
-          pInputText
-          type="text"
-          formControlName="username"
-          class="w-full"
-          placeholder="Enter username"
-        />
-        <small
-          *ngIf="
-            userForm.get('username')?.touched &&
-            userForm.get('username')?.invalid
-          "
-          class="text-red-500"
-          >Username is required</small
-        >
-      </div>
-    </div>
+            ) {
+            <small
+              class="text-red-500"
+              >Full name is required</small
+              >
+          }
+        </div>
+        <div class="flex flex-col w-full">
+          <label class="block mb-1 text-sm font-medium">Username</label>
+          <input
+            pInputText
+            type="text"
+            formControlName="username"
+            class="w-full"
+            placeholder="Enter username"
+            />
+            @if (
+              userForm.get('username')?.touched &&
+              userForm.get('username')?.invalid
+              ) {
+              <small
+                class="text-red-500"
+                >Username is required</small
+                >
+            }
+          </div>
+        </div>
 
-    <!-- Username -->
+        <!-- Username -->
 
-    <!-- Email -->
-    <div class="flex flex-row gap-5">
-      <div class="flex flex-col w-full">
-        <label class="block mb-1 text-sm font-medium">Email</label>
-        <input
-          pInputText
-          type="email"
-          formControlName="email"
-          class="w-full"
-          placeholder="Enter email"
-        />
-        <small
-          *ngIf="
-            userForm.get('email')?.touched && userForm.get('email')?.invalid
-          "
-          class="text-red-500"
-          >Valid email is required</small
-        >
-      </div>
+        <!-- Email -->
+        <div class="flex flex-row gap-5">
+          <div class="flex flex-col w-full">
+            <label class="block mb-1 text-sm font-medium">Email</label>
+            <input
+              pInputText
+              type="email"
+              formControlName="email"
+              class="w-full"
+              placeholder="Enter email"
+              />
+              @if (
+                userForm.get('email')?.touched && userForm.get('email')?.invalid
+                ) {
+                <small
+                  class="text-red-500"
+                  >Valid email is required</small
+                  >
+              }
+            </div>
 
-      <!-- Phone -->
-      <div class="flex flex-col w-full">
-        <label class="block mb-1 text-sm font-medium">Phone</label>
-        <!-- <input
-        pInputText
-        type="text"
-        formControlName="phone"
-        class="w-full"
-        placeholder="Enter phone number"
-      /> -->
-        <p-inputnumber
-          id="phone"
-          formControlName="phone"
-          maxlength="10"
-          [useGrouping]="false"
-          class="w-full"
-          placeholder="Enter phone number"
-        />
-        <small
-          *ngIf="
-            userForm.get('phone')?.touched && userForm.get('phone')?.invalid
-          "
-          class="text-red-500"
-          >Valid 10-digit phone is required</small
-        >
-      </div>
-    </div>
+            <!-- Phone -->
+            <div class="flex flex-col w-full">
+              <label class="block mb-1 text-sm font-medium">Phone</label>
+              <!-- <input
+              pInputText
+              type="text"
+              formControlName="phone"
+              class="w-full"
+              placeholder="Enter phone number"
+              /> -->
+              <p-inputnumber
+                id="phone"
+                formControlName="phone"
+                maxlength="10"
+                [useGrouping]="false"
+                class="w-full"
+                placeholder="Enter phone number"
+                />
+                @if (
+                  userForm.get('phone')?.touched && userForm.get('phone')?.invalid
+                  ) {
+                  <small
+                    class="text-red-500"
+                    >Valid 10-digit phone is required</small
+                    >
+                  }
+                </div>
+              </div>
 
-    <div class="flex flex-row gap-5">
-      <!-- Password -->
-      <div *ngIf="mode === 'add'" class="flex flex-col w-full">
-        <label class="block mb-1 text-sm font-medium">Password</label>
-        <p-password
-          id="password"
-          formControlName="password"
-          placeholder="Enter your password"
-          [toggleMask]="true"
-          [fluid]="true"
-          [feedback]="false"
-        ></p-password>
-        <small
-          *ngIf="
-            userForm.get('password')?.touched &&
-            userForm.get('password')?.invalid
-          "
-          class="text-red-500"
-          >Password must be at least 6 characters</small
-        >
-      </div>
+              <div class="flex flex-row gap-5">
+                <!-- Password -->
+                @if (mode === 'add') {
+                  <div class="flex flex-col w-full">
+                    <label class="block mb-1 text-sm font-medium">Password</label>
+                    <p-password
+                      id="password"
+                      formControlName="password"
+                      placeholder="Enter your password"
+                      [toggleMask]="true"
+                      [fluid]="true"
+                      [feedback]="false"
+                    ></p-password>
+                    @if (
+                      userForm.get('password')?.touched &&
+                      userForm.get('password')?.invalid
+                      ) {
+                      <small
+                        class="text-red-500"
+                        >Password must be at least 6 characters</small
+                        >
+                      }
+                    </div>
+                  }
 
-      <div *ngIf="mode === 'add'" class="flex flex-col w-full">
-        <label class="block mb-1 text-sm font-medium">Confrim Password</label>
-        <p-password
-          id="confirmPassword"
-          formControlName="confirmPassword"
-          placeholder="Confirm your password"
-          [toggleMask]="true"
-          [fluid]="true"
-          [feedback]="false"
-        ></p-password>
-        <small
-          *ngIf="
-            userForm.get('confirmPassword')?.touched &&
-            userForm.get('confirmPassword')?.invalid
-          "
-          class="text-red-500"
-          >Password must be at least 6 characters</small
-        >
-      </div>
-    </div>
+                  @if (mode === 'add') {
+                    <div class="flex flex-col w-full">
+                      <label class="block mb-1 text-sm font-medium">Confrim Password</label>
+                      <p-password
+                        id="confirmPassword"
+                        formControlName="confirmPassword"
+                        placeholder="Confirm your password"
+                        [toggleMask]="true"
+                        [fluid]="true"
+                        [feedback]="false"
+                      ></p-password>
+                      @if (
+                        userForm.get('confirmPassword')?.touched &&
+                        userForm.get('confirmPassword')?.invalid
+                        ) {
+                        <small
+                          class="text-red-500"
+                          >Password must be at least 6 characters</small
+                          >
+                        }
+                      </div>
+                    }
+                  </div>
 
-    <!-- Role -->
-    <div>
-      <label class="block mb-1 text-sm font-medium">Role</label>
-      <p-dropdown
-        [options]="roles"
-        optionLabel="label"
-        optionValue="value"
-        formControlName="role"
-        class="w-full"
-        placeholder="Select role"
-      ></p-dropdown>
-      <small
-        *ngIf="userForm.get('role')?.touched && userForm.get('role')?.invalid"
-        class="text-red-500"
-        >Role is required</small
-      >
-    </div>
+                  <!-- Role -->
+                  <div>
+                    <label class="block mb-1 text-sm font-medium">Role</label>
+                    <p-dropdown
+                      [options]="roles"
+                      optionLabel="label"
+                      optionValue="value"
+                      formControlName="role"
+                      class="w-full"
+                      placeholder="Select role"
+                    ></p-dropdown>
+                    @if (userForm.get('role')?.touched && userForm.get('role')?.invalid) {
+                      <small
+                        class="text-red-500"
+                        >Role is required</small
+                        >
+                      }
+                    </div>
 
-    <!-- Submit Button -->
-    <div class="pt-4">
-      <button
-        pButton
-        type="submit"
-        label="{{ mode === 'add' ? 'Create User' : 'Update User' }}"
-        [disabled]="userForm.invalid"
-        class="w-full"
-      ></button>
-    </div>
-  </form>
-</div>
+                    <!-- Submit Button -->
+                    <div class="pt-4">
+                      <button
+                        pButton
+                        type="submit"
+                        label="{{ mode === 'add' ? 'Create User' : 'Update User' }}"
+                        [disabled]="userForm.invalid"
+                        class="w-full"
+                      ></button>
+                    </div>
+                  </form>
+                </div>

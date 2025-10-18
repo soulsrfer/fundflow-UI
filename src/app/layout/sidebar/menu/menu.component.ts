@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -7,7 +7,7 @@ import { MenuService } from '@service/menu.service';
 
 @Component({
   selector: 'app-menu',
-  imports: [CommonModule, RouterModule, MenuItemComponent],
+  imports: [RouterModule, MenuItemComponent],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.scss',
 })
