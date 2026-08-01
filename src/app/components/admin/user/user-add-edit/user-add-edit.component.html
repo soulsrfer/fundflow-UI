@@ -1,4 +1,4 @@
-<div class="max-w-xl mx-auto mt-8 p-6 bg-white rounded-2xl shadow">
+<div class="max-w-xl mx-auto mt-8 p-6 dark:bg-gray-800 bg-white rounded-2xl shadow">
   <h2 class="text-xl font-semibold mb-6">
     {{ mode === "add" ? "Add User" : "Edit User" }}
   </h2>
@@ -82,7 +82,7 @@
               <p-inputnumber
                 id="phone"
                 formControlName="phone"
-                maxlength="10"
+                [maxlength]="10"
                 [useGrouping]="false"
                 class="w-full"
                 placeholder="Enter phone number"
@@ -150,14 +150,14 @@
                   <!-- Role -->
                   <div>
                     <label class="block mb-1 text-sm font-medium">Role</label>
-                    <p-dropdown
+                    <p-select
                       [options]="roles"
                       optionLabel="label"
                       optionValue="value"
                       formControlName="role"
                       class="w-full"
                       placeholder="Select role"
-                    ></p-dropdown>
+                    ></p-select>
                     @if (userForm.get('role')?.touched && userForm.get('role')?.invalid) {
                       <small
                         class="text-red-500"

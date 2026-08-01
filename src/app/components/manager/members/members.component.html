@@ -81,7 +81,7 @@
       </div>
       <div class="flex flex-col gap-2 mt-2">
         <label for="phone">Phone</label>
-        <p-inputnumber id="phone" formControlName="phone" maxlength="10" [useGrouping]="false"  />
+        <p-inputnumber id="phone" formControlName="phone" [maxlength]="10" [useGrouping]="false"  />
         <p-message
           *ngIf="
             phoneControl?.invalid &&

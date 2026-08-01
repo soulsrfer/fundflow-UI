@@ -1,10 +1,27 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { MessageService } from 'primeng/api';
+import { Subject } from 'rxjs';
+
+class MockMessageService {
+  messageSource = new Subject();
+  clearSource = new Subject();
+  add() {} 
+  clear() {}
+}
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [
+        {
+          // Tell TestBed to provide 'MessageService'
+          provide: MessageService,
+          // Use the simple mock class instead of the real service
+          useClass: MockMessageService 
+        }
+      ],
     }).compileComponents();
   });
 

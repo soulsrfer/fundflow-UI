@@ -10,10 +10,10 @@ import { ActivatedRoute } from '@angular/router';
 import { User } from '@interfaces/user.interface';
 import { UserService } from '@service/user.service';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'app-user-add-edit',
@@ -21,9 +21,9 @@ import { PasswordModule } from 'primeng/password';
     ReactiveFormsModule,
     InputTextModule,
     ButtonModule,
-    DropdownModule,
     InputNumberModule,
-    PasswordModule
+    PasswordModule,
+    SelectModule,
 ],
   templateUrl: './user-add-edit.component.html',
   styleUrl: './user-add-edit.component.scss',

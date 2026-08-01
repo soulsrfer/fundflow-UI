@@ -1,13 +1,19 @@
 // main.server.ts
-import { bootstrapApplication, BootstrapContext } from '@angular/platform-browser';
+import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { config } from './app/app.config.server';
 import { Request, Response } from 'express';
 import { REQUEST, RESPONSE } from 'tokens';
+import { ApplicationRef, PlatformRef } from '@angular/core';
 
+interface ServerBootstrapContext {
+  request?: Request;
+  response?: Response;
+}
 
+export default function bootstrap(context: ServerBootstrapContext) {
+    const { request, response } = context;
 
-export default function bootstrap(request: Request, response: Response) {
   return bootstrapApplication(AppComponent, {
     ...config,
     providers: [
@@ -15,5 +21,5 @@ export default function bootstrap(request: Request, response: Response) {
       { provide: RESPONSE, useValue: response }, // <-- manually provide res
       { provide: REQUEST, useValue: request },
     ],
-  }, context);
+  }, context as any);
 }

@@ -1,11 +1,11 @@
-/* You can add global styles to this file, and also import other style files */
-@use './tailwind.css';
+@use './tailwind.css'; 
 @use './assets/layout/layout.scss';
-@use 'primeicons/primeicons.css';
-@use './assets/demo/demo.scss';
-@import "tailwindcss";
+@use './assets/demo/demo.scss'; 
+@import 'primeicons/primeicons.css'; 
+@import 'material-symbols/index.css';
 
 
+/* Add any non-Tailwind global styles here. */
 
 .layout-topbar-logo img {
     content: url('/logos/fundflow-logo-3.svg');
@@ -13,4 +13,12 @@
 
 .login-page-logo img {
     content: url('/logos/fundflow-logo-3.svg');
+}
+
+.material-symbols-outlined,.material-symbols-rounded,.material-symbols-sharp {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 300,
+  'GRAD' 0,
+  'opsz' 24
 }
